@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Vibrant Emerald-Teal Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+
+    <!-- Drop Shadow -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-opacity="0.25" flood-color="#022c22" />
+    </filter>
+
+    <!-- Golden Coin Gradient -->
+    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+
+    <!-- Wallet Gradient -->
+    <linearGradient id="walletGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f0fdf4" />
+    </linearGradient>
+  </defs>
+
+  <!-- Squircle Rounded App Icon -->
+  <rect width="512" height="512" rx="124" fill="url(#bgGrad)" />
+
+  <!-- Subtle Inner Ring Highlight -->
+  <rect x="12" y="12" width="488" height="488" rx="114" fill="none" stroke="#ffffff" stroke-opacity="0.2" stroke-width="4" />
+
+  <!-- Main Wallet Body -->
+  <g filter="url(#dropShadow)">
+    <rect x="96" y="156" width="320" height="224" rx="36" fill="url(#walletGrad)" />
+    <!-- Wallet Flap / Seam Line -->
+    <path d="M 96 226 Q 256 256 416 226" stroke="#dcfce7" stroke-width="6" fill="none" />
+    <!-- Wallet Clasp -->
+    <rect x="330" y="228" width="86" height="68" rx="18" fill="#10b981" />
+    <circle cx="373" cy="262" r="12" fill="#ffffff" />
+  </g>
+
+  <!-- Growing Financial Growth Line inside Wallet -->
+  <path d="M 140 316 L 205 268 L 265 292 L 340 205" fill="none" stroke="#10b981" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.3" />
+
+  <!-- Shiny Golden Rupiah Coin Popping Out -->
+  <g filter="url(#dropShadow)">
+    <circle cx="216" cy="154" r="54" fill="url(#coinGrad)" stroke="#fef9c3" stroke-width="5" />
+    <circle cx="216" cy="154" r="42" fill="none" stroke="#d97706" stroke-width="3" stroke-dasharray="6,4" />
+    <text x="216" y="170" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="900" fill="#78350f" text-anchor="middle">Rp</text>
+  </g>
+
+  <!-- Sparkles -->
+  <path d="M 390 120 Q 390 138 405 138 Q 390 138 390 156 Q 390 138 375 138 Q 390 138 390 120 Z" fill="#fef08a" />
+  <circle cx="120" cy="120" r="7" fill="#ffffff" opacity="0.8" />
+  <circle cx="430" cy="386" r="6" fill="#ffffff" opacity="0.6" />
+</svg>
