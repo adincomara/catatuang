@@ -29,3 +29,17 @@ CREATE TABLE IF NOT EXISTS transactions (
 );
 
 CREATE INDEX IF NOT EXISTS idx_tx_user ON transactions(user_email, updated_at);
+
+CREATE TABLE IF NOT EXISTS batches (
+  id TEXT PRIMARY KEY,
+  user_email TEXT NOT NULL,
+  name TEXT NOT NULL,
+  start_date TEXT NOT NULL,
+  end_date TEXT NOT NULL,
+  snapshot TEXT NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  deleted_at INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_batches_user ON batches(user_email, updated_at);

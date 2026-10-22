@@ -30,12 +30,27 @@ export async function POST({ request, locals }) {
           status: 'ok',
           connected: false,
           serverTime,
-          pulled: { wallets: [], transactions: [] },
+          pulled: { wallets: [], transactions: [], batches: [] },
           message: 'D1 not bound in current runtime; mutations retained locally'
         }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
+
+    // Auto-ensure batches table exists in D1
+    await db.prepare(
+      `CREATE TABLE IF NOT EXISTS batches (
+        id TEXT PRIMARY KEY,
+        user_email TEXT NOT NULL,
+        name TEXT NOT NULL,
+        start_date TEXT NOT NULL,
+        end_date TEXT NOT NULL,
+        snapshot TEXT NOT NULL,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL,
+        deleted_at INTEGER
+      )`
+    ).run();
 
     // 1. Process incoming wallet mutations
     if (mutations && Array.isArray(mutations.wallets) && mutations.wallets.length > 0) {
@@ -103,7 +118,38 @@ export async function POST({ request, locals }) {
       }
     }
 
-    // 3. Query records updated since client's lastSyncTime
+    // 3. Process incoming batch mutations (Tutup Buku snapshots)
+    if (mutations && Array.isArray(mutations.batches) && mutations.batches.length > 0) {
+      for (const b of mutations.batches) {
+        await db
+          .prepare(
+            `INSERT INTO batches (id, user_email, name, start_date, end_date, snapshot, created_at, updated_at, deleted_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             ON CONFLICT(id) DO UPDATE SET
+               name = excluded.name,
+               start_date = excluded.start_date,
+               end_date = excluded.end_date,
+               snapshot = excluded.snapshot,
+               updated_at = excluded.updated_at,
+               deleted_at = excluded.deleted_at
+             WHERE excluded.updated_at >= batches.updated_at`
+          )
+          .bind(
+            b.id,
+            cleanEmail,
+            b.name || 'Batch',
+            b.startDate || b.start_date || '',
+            b.endDate || b.end_date || '',
+            typeof b.snapshot === 'string' ? b.snapshot : JSON.stringify(b.snapshot || {}),
+            b.createdAt || b.created_at || serverTime,
+            b.updated_at || b.updatedAt || serverTime,
+            b.deleted_at || b.deletedAt || null
+          )
+          .run();
+      }
+    }
+
+    // 4. Query records updated since client's lastSyncTime
     const sinceTime = Number(lastSyncTime) || 0;
 
     const walletsRes = await db
@@ -124,6 +170,15 @@ export async function POST({ request, locals }) {
       .bind(cleanEmail, sinceTime)
       .all();
 
+    const batchesRes = await db
+      .prepare(
+        `SELECT id, name, start_date as startDate, end_date as endDate, snapshot, created_at as createdAt, updated_at, deleted_at
+         FROM batches
+         WHERE user_email = ? AND updated_at > ?`
+      )
+      .bind(cleanEmail, sinceTime)
+      .all();
+
     return new Response(
       JSON.stringify({
         status: 'ok',
@@ -131,7 +186,11 @@ export async function POST({ request, locals }) {
         serverTime,
         pulled: {
           wallets: walletsRes.results || [],
-          transactions: txRes.results || []
+          transactions: txRes.results || [],
+          batches: (batchesRes.results || []).map(b => ({
+            ...b,
+            snapshot: typeof b.snapshot === 'string' ? JSON.parse(b.snapshot) : b.snapshot
+          }))
         }
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }

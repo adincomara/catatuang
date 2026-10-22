@@ -75,7 +75,7 @@ export function getCategory(type, id) {
 }
 
 export function getWallet(id) {
-  return state.wallets.find(w => w.id === id) || { name: 'Dompet', icon: '👛', color: '#64748b' };
+  return state.getEffectiveWallets().find(w => w.id === id) || { name: 'Dompet', icon: '👛', color: '#64748b' };
 }
 
 // Format period label for header & titles
@@ -149,7 +149,8 @@ export async function triggerAutoSync(silent = false) {
   try {
     const mutationsPayload = {
       wallets: (state.syncQueue?.wallets || []).slice(),
-      transactions: (state.syncQueue?.transactions || []).slice()
+      transactions: (state.syncQueue?.transactions || []).slice(),
+      batches: (state.syncQueue?.batches || []).slice()
     };
 
     const resp = await fetch('/api/sync', {
@@ -167,9 +168,11 @@ export async function triggerAutoSync(silent = false) {
       if (data.status === 'ok') {
         const syncedWalletIds = new Set(mutationsPayload.wallets.map(w => w.id));
         const syncedTxIds = new Set(mutationsPayload.transactions.map(t => t.id));
+        const syncedBatchIds = new Set(mutationsPayload.batches.map(b => b.id));
 
         state.syncQueue.wallets = (state.syncQueue.wallets || []).filter(w => !syncedWalletIds.has(w.id));
         state.syncQueue.transactions = (state.syncQueue.transactions || []).filter(t => !syncedTxIds.has(t.id));
+        state.syncQueue.batches = (state.syncQueue.batches || []).filter(b => !syncedBatchIds.has(b.id));
 
         state.lastSyncTime = data.serverTime || Date.now();
 
@@ -181,7 +184,7 @@ export async function triggerAutoSync(silent = false) {
         }
 
         state.saveUserData();
-        if (!silent && (mutationsPayload.wallets.length > 0 || mutationsPayload.transactions.length > 0)) {
+        if (!silent && (mutationsPayload.wallets.length > 0 || mutationsPayload.transactions.length > 0 || mutationsPayload.batches.length > 0)) {
           showToast('✓ 100% Tersinkron ke database!');
         }
       }
@@ -248,6 +251,33 @@ function renderHeader() {
     dropdownEmail.textContent = state.googleUser.email || '';
   }
 
+  // Update Batch Selector Pill & Read-only Archive Banner
+  const batchBtn = document.getElementById('btnBatchSelector');
+  const batchLabel = document.getElementById('batchSelectorLabel');
+  const batchIcon = document.getElementById('batchSelectorIcon');
+  const archiveBanner = document.getElementById('batchArchiveBanner');
+  const archiveName = document.getElementById('batchArchiveName');
+
+  const activeBatch = state.getActiveBatch();
+  if (activeBatch) {
+    if (batchLabel) batchLabel.textContent = activeBatch.name;
+    if (batchIcon) batchIcon.textContent = '📁';
+    if (batchBtn) {
+      batchBtn.classList.remove('bg-canvas-soft');
+      batchBtn.classList.add('bg-amber-400', 'border-amber-500');
+    }
+    if (archiveBanner) archiveBanner.classList.remove('hidden');
+    if (archiveName) archiveName.textContent = activeBatch.name;
+  } else {
+    if (batchLabel) batchLabel.textContent = 'Buku Aktif';
+    if (batchIcon) batchIcon.textContent = '📦';
+    if (batchBtn) {
+      batchBtn.classList.add('bg-canvas-soft');
+      batchBtn.classList.remove('bg-amber-400', 'border-amber-500');
+    }
+    if (archiveBanner) archiveBanner.classList.add('hidden');
+  }
+
   updateSyncUI();
 }
 
@@ -267,7 +297,7 @@ function renderHome() {
   // Wallets strip
   const walletsContainer = document.getElementById('homeWalletsList');
   if (walletsContainer) {
-    walletsContainer.innerHTML = state.wallets.map(w => {
+    walletsContainer.innerHTML = state.getEffectiveWallets().map(w => {
       const bal = state.getWalletBalance(w.id);
       return `
         <div class="p-3.5 bg-canvas-soft border border-hairline rounded-xs flex items-center justify-between">
@@ -331,7 +361,7 @@ function renderWallets() {
 
   const container = document.getElementById('walletsListFull');
   if (container) {
-    container.innerHTML = state.wallets.map(w => {
+    container.innerHTML = state.getEffectiveWallets().map(w => {
       const bal = state.getWalletBalance(w.id);
       return `
         <div class="p-4 border border-hairline rounded-xs bg-white hover:border-hairline-strong transition space-y-3">
@@ -343,13 +373,14 @@ function renderWallets() {
                 <span class="text-[10px] uppercase font-bold text-primary bg-mint-50 px-2 py-0.5 rounded-xs">${w.type}</span>
               </div>
             </div>
+            ${!state.activeBatchId ? `
             <button
               type="button"
               onclick="window.catatuangApp.openEditWalletModal('${w.id}')"
               class="text-xs font-bold text-muted hover:text-ink px-2 py-1 rounded-xs border border-hairline hover:bg-canvas-soft"
             >
               Ubah
-            </button>
+            </button>` : ''}
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-2 border-t border-hairline text-left">
@@ -373,7 +404,7 @@ function renderTransactions() {
   const walletSelect = document.getElementById('txWalletFilterSelect');
   if (walletSelect) {
     walletSelect.innerHTML = `<option value="all">Semua Dompet</option>` +
-      state.wallets.map(w => `<option value="${w.id}" ${state.filterWallet === w.id ? 'selected' : ''}>${w.name}</option>`).join('');
+      state.getEffectiveWallets().map(w => `<option value="${w.id}" ${state.filterWallet === w.id ? 'selected' : ''}>${w.name}</option>`).join('');
   }
 
   const periodTxs = state.getPeriodTransactions();
@@ -654,8 +685,176 @@ export function changePeriodDelta(delta) {
   showToast(`Periode: ${formatPeriodLabel()}`);
 }
 
+// --- BATCH (TUTUP BUKU) MODAL HANDLERS ---
+
+export function openBatchModal() {
+  const modal = document.getElementById('batchModal');
+  const badge = document.getElementById('batchCurrentPeriodBadge');
+  const nameInp = document.getElementById('batchNameInput');
+  const resetBtn = document.getElementById('btnResetToLiveBook');
+
+  if (badge) badge.textContent = formatPeriodLabel();
+  if (nameInp) {
+    nameInp.value = '';
+    nameInp.placeholder = `Contoh: Periode ${formatPeriodLabel()}`;
+  }
+
+  if (resetBtn) {
+    if (state.activeBatchId) {
+      resetBtn.classList.remove('hidden');
+      resetBtn.onclick = () => {
+        exitBatchModeAction();
+        closeBatchModal();
+      };
+    } else {
+      resetBtn.classList.add('hidden');
+    }
+  }
+
+  renderBatchArchiveList();
+  if (modal) modal.classList.add('active');
+}
+
+export function closeBatchModal() {
+  const modal = document.getElementById('batchModal');
+  if (modal) modal.classList.remove('active');
+}
+
+export function renderBatchArchiveList() {
+  const container = document.getElementById('batchArchiveList');
+  if (!container) return;
+
+  const batches = state.batches || [];
+  if (batches.length === 0) {
+    container.innerHTML = `
+      <div class="p-4 bg-canvas-soft border border-hairline rounded-xs text-center text-xs text-muted">
+        Belum ada arsip batch tersimpan. Tutup buku di atas untuk membuat arsip pertama.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = batches.map(b => {
+    const isCur = state.activeBatchId === b.id;
+    const txCount = b.snapshot?.transactions ? b.snapshot.transactions.length : 0;
+    const expense = b.snapshot?.summary?.expense || 0;
+    const net = b.snapshot?.summary?.net || 0;
+    const createdDate = b.createdAt ? new Date(b.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
+    return `
+      <div class="p-3 border rounded-xs transition ${isCur ? 'bg-amber-50 border-amber-400' : 'bg-white border-hairline hover:border-hairline-strong'}">
+        <div class="flex items-start justify-between gap-2">
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-xs font-bold text-ink">${b.name}</span>
+              ${isCur ? '<span class="text-[9px] uppercase font-black bg-amber-400 text-ink px-1.5 py-0.5 rounded-xs">Sedang Dilihat</span>' : ''}
+            </div>
+            <div class="text-[11px] text-muted mt-0.5">
+              📅 ${b.startDate} s/d ${b.endDate} • ${txCount} Transaksi
+            </div>
+            <div class="text-[11px] text-body mt-1">
+              Pengeluaran: <strong>${formatCurrency(expense)}</strong> | Saldo: <strong class="${net < 0 ? 'text-error' : 'text-primary'}">${formatCurrency(net)}</strong>
+            </div>
+            ${createdDate ? `<div class="text-[10px] text-muted mt-0.5">Diarsipkan: ${createdDate}</div>` : ''}
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0">
+            ${isCur ? `
+              <button
+                type="button"
+                onclick="window.catatuangApp.exitBatchModeAction()"
+                class="px-2.5 py-1 text-xs font-bold rounded-xs bg-ink text-white hover:bg-neutral-800 transition"
+              >
+                Keluar
+              </button>
+            ` : `
+              <button
+                type="button"
+                onclick="window.catatuangApp.selectBatchAction('${b.id}')"
+                class="px-2.5 py-1 text-xs font-bold rounded-xs bg-canvas-soft border border-hairline text-ink hover:border-primary hover:text-primary transition"
+              >
+                Buka
+              </button>
+            `}
+            <button
+              type="button"
+              onclick="window.catatuangApp.deleteBatchAction('${b.id}')"
+              class="p-1 text-muted hover:text-error transition text-xs"
+              title="Hapus batch"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+export function selectBatchAction(batchId) {
+  state.selectBatch(batchId);
+  const activeBatch = state.getActiveBatch();
+  closeBatchModal();
+  renderApp();
+  showToast(`Melihat arsip batch: ${activeBatch?.name || ''} (Hanya Baca)`);
+}
+
+export function exitBatchModeAction() {
+  state.exitBatchMode();
+  closeBatchModal();
+  renderApp();
+  showToast('Kembali ke Buku Aktif.');
+}
+
+export async function archiveCurrentBatchAction() {
+  if (state.activeBatchId) {
+    showToast('Harap kembali ke Buku Aktif terlebih dahulu untuk menutup buku.');
+    return;
+  }
+
+  const nameInp = document.getElementById('batchNameInput');
+  const batchName = nameInp?.value?.trim();
+  const carryOption = document.querySelector('input[name="batchCarryBalance"]:checked')?.value;
+  const carryOver = carryOption === 'carry';
+
+  const periodTxs = state.getPeriodTransactions();
+  if (periodTxs.length === 0) {
+    if (!confirm('Tidak ada transaksi pada periode aktif saat ini. Tetap ingin tutup buku?')) {
+      return;
+    }
+  } else {
+    if (!confirm(`Tutup buku untuk periode ${formatPeriodLabel()}?\n\n${periodTxs.length} transaksi akan dipindahkan ke Arsip D1 dan buku aktif direset.`)) {
+      return;
+    }
+  }
+
+  const created = state.archiveCurrentBatch(batchName, carryOver);
+  closeBatchModal();
+  renderApp();
+  showToast(`✓ Batch "${created.name}" berhasil diarsipkan & disimpan!`);
+  await triggerAutoSync(true);
+}
+
+export function deleteBatchAction(batchId) {
+  const b = state.batches?.find(item => item.id === batchId);
+  if (!b) return;
+
+  if (confirm(`Hapus permanen arsip batch "${b.name}"?`)) {
+    state.deleteBatch(batchId);
+    renderBatchArchiveList();
+    renderApp();
+    triggerAutoSync(true);
+    showToast(`Arsip batch "${b.name}" telah dihapus.`);
+  }
+}
+
 // Transaction Modal Handlers
 export function openAddTransactionModal(presetType = 'expense') {
+  if (state.activeBatchId) {
+    showToast('Mode Arsip (Hanya Baca): Kembali ke Buku Aktif untuk mencatat transaksi.');
+    return;
+  }
+
   state.editingTxId = null;
   state.currentTxType = presetType;
   state.selectedCategory = presetType === 'income' ? 'salary' : 'food';
@@ -683,6 +882,11 @@ export function openAddTransactionModal(presetType = 'expense') {
 }
 
 export function openEditTransactionModal(txId) {
+  if (state.activeBatchId) {
+    showToast('Mode Arsip (Hanya Baca): Kembali ke Buku Aktif untuk mengubah transaksi.');
+    return;
+  }
+
   const tx = state.transactions.find(t => t.id === txId);
   if (!tx) return;
 
@@ -758,7 +962,7 @@ export function populateWalletSelects() {
   const src = document.getElementById('txModalSourceWallet');
   const tgt = document.getElementById('txModalTargetWallet');
 
-  const options = state.wallets.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+  const options = state.getEffectiveWallets().map(w => `<option value="${w.id}">${w.name}</option>`).join('');
   if (src) src.innerHTML = options;
   if (tgt) tgt.innerHTML = options;
 }
@@ -791,6 +995,11 @@ export function selectCategory(catId) {
 }
 
 export function saveTransaction() {
+  if (state.activeBatchId) {
+    showToast('Mode Arsip (Hanya Baca): Tidak dapat menyimpan transaksi ke arsip.');
+    return;
+  }
+
   const amtInput = document.getElementById('txModalAmount');
   const amount = parseRawAmount(amtInput ? amtInput.value : 0);
   if (!amount || amount <= 0) {
@@ -857,7 +1066,7 @@ export function saveTransaction() {
 
 // Transaction Detail Modal
 export function openTransactionDetail(txId) {
-  const tx = state.transactions.find(t => t.id === txId);
+  const tx = state.getPeriodTransactions().find(t => t.id === txId);
   if (!tx) return;
 
   const modal = document.getElementById('txDetailModal');
@@ -887,24 +1096,36 @@ export function openTransactionDetail(txId) {
   if (noteEl) noteEl.textContent = tx.note || '-';
 
   const editBtn = document.getElementById('btnEditDetailTx');
-  if (editBtn) editBtn.onclick = () => openEditTransactionModal(txId);
+  if (editBtn) {
+    if (state.activeBatchId) {
+      editBtn.classList.add('hidden');
+    } else {
+      editBtn.classList.remove('hidden');
+      editBtn.onclick = () => openEditTransactionModal(txId);
+    }
+  }
 
   const delBtn = document.getElementById('btnDeleteDetailTx');
   if (delBtn) {
-    delBtn.onclick = () => {
-      if (confirm('Yakin ingin menghapus transaksi ini?')) {
-        const toDelete = state.transactions.find(t => t.id === txId);
-        if (toDelete) {
-          state.queueTxMutation(toDelete, true);
+    if (state.activeBatchId) {
+      delBtn.classList.add('hidden');
+    } else {
+      delBtn.classList.remove('hidden');
+      delBtn.onclick = () => {
+        if (confirm('Yakin ingin menghapus transaksi ini?')) {
+          const toDelete = state.transactions.find(t => t.id === txId);
+          if (toDelete) {
+            state.queueTxMutation(toDelete, true);
+          }
+          state.transactions = state.transactions.filter(t => t.id !== txId);
+          state.saveUserData();
+          closeDetailModal();
+          renderApp();
+          triggerAutoSync(true);
+          showToast('Transaksi telah dihapus.');
         }
-        state.transactions = state.transactions.filter(t => t.id !== txId);
-        state.saveUserData();
-        closeDetailModal();
-        renderApp();
-        triggerAutoSync(true);
-        showToast('Transaksi telah dihapus.');
-      }
-    };
+      };
+    }
   }
 
   if (modal) modal.classList.add('active');
@@ -917,6 +1138,11 @@ export function closeDetailModal() {
 
 // Wallet Modal Handlers
 export function openAddWalletModal() {
+  if (state.activeBatchId) {
+    showToast('Mode Arsip (Hanya Baca): Kembali ke Buku Aktif untuk menambah dompet.');
+    return;
+  }
+
   state.editingWalletId = null;
   const modal = document.getElementById('walletModal');
   const title = document.getElementById('modalWalletTitle');
@@ -935,6 +1161,11 @@ export function openAddWalletModal() {
 }
 
 export function openEditWalletModal(walletId) {
+  if (state.activeBatchId) {
+    showToast('Mode Arsip (Hanya Baca): Kembali ke Buku Aktif untuk mengubah dompet.');
+    return;
+  }
+
   const w = state.wallets.find(item => item.id === walletId);
   if (!w) return;
 
@@ -979,6 +1210,11 @@ export function closeWalletModal() {
 }
 
 export function saveWallet() {
+  if (state.activeBatchId) {
+    showToast('Mode Arsip (Hanya Baca): Tidak dapat mengubah dompet pada arsip.');
+    return;
+  }
+
   const name = document.getElementById('walletNameInput')?.value?.trim();
   const type = document.getElementById('walletTypeInput')?.value || 'bank';
   const balance = parseRawAmount(document.getElementById('walletBalanceInput')?.value);
@@ -1112,6 +1348,8 @@ export function logoutGoogle() {
     state.saveRaw('catatuang_auth_user', null);
     state.wallets = [];
     state.transactions = [];
+    state.batches = [];
+    state.activeBatchId = null;
     renderApp();
     showToast('Telah keluar dari akun Google.');
   }
@@ -1182,6 +1420,10 @@ export async function exportXLSX() {
 }
 
 export function resetAllUserData() {
+  if (state.activeBatchId) {
+    showToast('Harap kembali ke Buku Aktif terlebih dahulu.');
+    return;
+  }
   if (confirm('YAKIN ingin menghapus seluruh data catatan akun ini? Tindakan ini tidak dapat dibatalkan.')) {
     state.transactions = [];
     state.wallets = DEFAULT_WALLETS;
@@ -1275,6 +1517,12 @@ export function initCatatUang() {
     openEditWalletModal,
     closeWalletModal,
     saveWallet,
+    openBatchModal,
+    closeBatchModal,
+    selectBatchAction,
+    exitBatchModeAction,
+    archiveCurrentBatchAction,
+    deleteBatchAction,
     loginWithGoogle,
     logoutGoogle,
     exportXLSX,
@@ -1302,6 +1550,13 @@ function setupListeners() {
   document.getElementById('btnPrevPeriod')?.addEventListener('click', () => changePeriodDelta(-1));
   document.getElementById('btnNextPeriod')?.addEventListener('click', () => changePeriodDelta(1));
   document.querySelectorAll('.btn-close-period-modal').forEach(b => b.addEventListener('click', closePeriodModal));
+
+  // Batch & Tutup Buku
+  document.getElementById('btnBatchSelector')?.addEventListener('click', openBatchModal);
+  document.querySelectorAll('.btn-close-batch-modal').forEach(b => b.addEventListener('click', closeBatchModal));
+  document.getElementById('btnArchiveBatchConfirm')?.addEventListener('click', archiveCurrentBatchAction);
+  document.getElementById('btnExitBatchBanner')?.addEventListener('click', exitBatchModeAction);
+  document.getElementById('btnResetToLiveBook')?.addEventListener('click', exitBatchModeAction);
 
   // Period Presets
   document.querySelectorAll('.btn-period-preset').forEach(b => {

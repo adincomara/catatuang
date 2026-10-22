@@ -158,4 +158,91 @@ assert.equal(parseRawAmount('5.000.000'), 5000000, 'Must safely parse 5.000.000 
 assert.equal(parseRawAmount(''), 0);
 assert.equal(parseRawAmount(null), 0);
 
-console.log('✓ All 7 core logic test assertions passed successfully.');
+// Test 8: Batch / Tutup Buku Archival & Reset Logic
+function archiveBatch(wallets, transactions, startDate, endDate, batchName, carryOver) {
+  const periodTxs = transactions.filter(t => isDateInPeriod(t.date, startDate, endDate));
+  const summary = computePeriodSummary(transactions, startDate, endDate);
+  const currentWallets = wallets.map(w => ({
+    ...w,
+    finalBalance: computeWalletBalance(w, transactions, startDate, endDate)
+  }));
+
+  const batch = {
+    id: 'batch_test_1',
+    name: batchName || `Batch ${startDate} s/d ${endDate}`,
+    startDate,
+    endDate,
+    snapshot: {
+      wallets: currentWallets,
+      transactions: periodTxs,
+      summary
+    },
+    createdAt: 2000,
+    updated_at: 2000
+  };
+
+  const periodTxIds = new Set(periodTxs.map(t => t.id));
+  const remainingTransactions = transactions.filter(t => !periodTxIds.has(t.id));
+
+  const resetWallets = wallets.map(w => {
+    const finalBal = computeWalletBalance(w, transactions, startDate, endDate);
+    return {
+      ...w,
+      initialBalance: carryOver ? finalBal : 0
+    };
+  });
+
+  return { batch, remainingTransactions, resetWallets };
+}
+
+// Test 8a: Archive with balance reset to 0
+const initialWallets = [
+  { id: 'w1', name: 'Cash', initialBalance: 500000 },
+  { id: 'w2', name: 'Bank', initialBalance: 1000000 }
+];
+const octTxs = [
+  { id: 'tx1', date: '2026-10-05T10:00:00', amount: 100000, type: 'income', walletId: 'w1' },
+  { id: 'tx2', date: '2026-10-20T10:00:00', amount: 40000, type: 'expense', walletId: 'w1' },
+  { id: 'tx3', date: '2026-11-02T10:00:00', amount: 15000, type: 'expense', walletId: 'w1' }
+];
+
+const { batch: b1, remainingTransactions: rem1, resetWallets: rw1 } = archiveBatch(
+  initialWallets,
+  octTxs,
+  '2026-10-01',
+  '2026-10-31',
+  'Oktober 2026',
+  false // reset to 0
+);
+
+assert.equal(b1.snapshot.transactions.length, 2, 'Archived 2 October transactions');
+assert.equal(b1.snapshot.summary.income, 100000);
+assert.equal(b1.snapshot.summary.expense, 40000);
+assert.equal(b1.snapshot.summary.net, 60000);
+assert.equal(rem1.length, 1, 'Only November transaction remains in active book');
+assert.equal(rem1[0].id, 'tx3');
+assert.equal(rw1.find(w => w.id === 'w1').initialBalance, 0, 'Wallet initial balance reset to 0');
+
+// Test 8b: Archive with carry-over balance
+const { resetWallets: rw2 } = archiveBatch(
+  initialWallets,
+  octTxs,
+  '2026-10-01',
+  '2026-10-31',
+  'Oktober 2026',
+  true // carry over
+);
+// w1: initial 500000 + 100000 - 40000 = 560000 carried over
+assert.equal(rw2.find(w => w.id === 'w1').initialBalance, 560000, 'Carried over final balance');
+
+// Test 8c: Batch merge server conflict resolution
+const localBatches = [{ id: 'b1', name: 'Batch 1', updated_at: 1000 }];
+const serverBatches = [
+  { id: 'b1', name: 'Batch 1 Renamed', updated_at: 1050 },
+  { id: 'b2', name: 'Batch 2 New', updated_at: 1020 }
+];
+const mergedBatches = mergeRecords(localBatches, serverBatches);
+assert.equal(mergedBatches.length, 2);
+assert.equal(mergedBatches.find(b => b.id === 'b1').name, 'Batch 1 Renamed');
+
+console.log('✓ All 8 core logic test assertions passed successfully.');
