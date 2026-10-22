@@ -1,0 +1,72 @@
+---
+// Tab: Transactions (Riwayat Mutasi)
+---
+
+<div id="tab-transactions" class="tab-pane hidden space-y-5">
+  
+  <!-- Filter & Search Toolbar -->
+  <div class="bg-white border border-hairline-strong rounded-lg p-4 space-y-3 shadow-flat-subtle">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <!-- Search -->
+      <div class="relative flex-1">
+        <input
+          type="text"
+          id="txSearchInput"
+          placeholder="Cari transaksi atau catatan..."
+          class="w-full pl-9 pr-3 py-2.5 text-xs bg-canvas-soft border border-hairline rounded-xs text-ink placeholder-muted focus:outline-none focus:border-primary"
+        />
+        <span class="absolute left-3 top-2.5 text-sm text-muted">🔍</span>
+      </div>
+
+      <!-- Wallet Filter -->
+      <div class="w-full sm:w-48 shrink-0">
+        <select
+          id="txWalletFilterSelect"
+          class="w-full py-2.5 px-3 text-xs bg-canvas-soft border border-hairline rounded-xs text-ink font-semibold focus:outline-none focus:border-primary"
+        >
+          <option value="all">Semua Dompet</option>
+        </select>
+      </div>
+
+      <!-- Quick Add Button -->
+      <button
+        type="button"
+        onclick="window.catatuangApp.openAddTransactionModal('expense')"
+        class="btn-spruce px-4 py-2.5 text-xs uppercase shrink-0"
+      >
+        + Catat Transaksi
+      </button>
+    </div>
+
+    <!-- Type Filters -->
+    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1 border-t border-hairline">
+      <button type="button" data-type="all" class="tx-filter-chip px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xs bg-primary text-white shrink-0">
+        Semua
+      </button>
+      <button type="button" data-type="expense" class="tx-filter-chip px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xs bg-canvas-soft border border-hairline text-body hover:text-ink shrink-0">
+        Pengeluaran
+      </button>
+      <button type="button" data-type="income" class="tx-filter-chip px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xs bg-canvas-soft border border-hairline text-body hover:text-ink shrink-0">
+        Pemasukan
+      </button>
+      <button type="button" data-type="transfer" class="tx-filter-chip px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-xs bg-canvas-soft border border-hairline text-body hover:text-ink shrink-0">
+        Transfer
+      </button>
+    </div>
+  </div>
+
+  <!-- Transaction Feed Card -->
+  <div class="bg-white border border-hairline-strong rounded-lg p-5 shadow-flat-subtle">
+    <div class="flex items-center justify-between pb-3 border-b border-hairline mb-3">
+      <div class="text-xs font-bold uppercase tracking-wider text-muted">Daftar Transaksi</div>
+      <div id="txCountBadge" class="text-xs font-bold text-primary bg-mint-50 px-2 py-0.5 rounded-xs">
+        0 transaksi
+      </div>
+    </div>
+
+    <div id="txGroupedFeed" class="space-y-4">
+      <!-- Grouped by date dynamically -->
+    </div>
+  </div>
+
+</div>

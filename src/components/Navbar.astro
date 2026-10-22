@@ -1,0 +1,104 @@
+---
+// Responsive Top Navbar according to design.md
+---
+
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-hairline px-4 lg:px-8 py-3">
+  <div class="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
+    
+    <!-- Left: Brand Wordmark -->
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-primary rounded-xs flex items-center justify-center text-white font-black text-sm">
+        CU
+      </div>
+      <div class="hidden sm:block">
+        <span class="text-base font-extrabold text-ink tracking-tight">Catat<span class="text-primary">Uang</span></span>
+        <span class="hidden md:inline-block ml-2 text-[10px] uppercase font-bold text-muted bg-mint-50 px-2 py-0.5 rounded-xs border border-hairline">Personal</span>
+      </div>
+    </div>
+
+    <!-- Center: Custom Period Selector Pill & Sync Status -->
+    <div class="flex items-center gap-2">
+      <div class="flex items-center bg-canvas-soft border border-hairline rounded-xs p-1">
+        <button
+          type="button"
+          id="btnPrevPeriod"
+          class="w-7 h-7 flex items-center justify-center text-muted hover:text-ink hover:bg-white rounded-xs transition text-sm font-bold"
+          title="Periode Sebelumnya"
+        >
+          ‹
+        </button>
+
+        <button
+          type="button"
+          id="btnOpenPeriodModal"
+          class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-ink hover:text-primary transition"
+        >
+          <span class="text-sm">📅</span>
+          <span id="labelCurrentPeriod">Bulan Ini</span>
+          <span class="text-[10px] text-muted">▼</span>
+        </button>
+
+        <button
+          type="button"
+          id="btnNextPeriod"
+          class="w-7 h-7 flex items-center justify-center text-muted hover:text-ink hover:bg-white rounded-xs transition text-sm font-bold"
+          title="Periode Berikutnya"
+        >
+          ›
+        </button>
+      </div>
+
+      <!-- Cloudflare D1 Sync Indicator Badge -->
+      <button
+        type="button"
+        id="syncStatusBadge"
+        class="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold rounded-xs bg-mint-50 border border-mint-200 text-primary transition"
+        title="Klik untuk cek status sinkronisasi D1"
+      >
+        <span id="syncStatusDot" class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        <span id="syncStatusText" class="hidden xs:inline">100% Tersinkron</span>
+      </button>
+    </div>
+
+    <!-- Right: Balance & User Status -->
+    <div class="flex items-center gap-3">
+      <!-- Total Balance Display -->
+      <div class="text-right">
+        <div class="text-[10px] uppercase font-bold text-muted tracking-wider">Saldo Periode</div>
+        <div class="flex items-center justify-end gap-1.5">
+          <span id="headerTotalBalance" class="text-sm lg:text-base font-black text-ink">Rp 0</span>
+          <button id="btnToggleHideBalance" class="text-muted hover:text-ink transition p-0.5" title="Sembunyikan Saldo">
+            👁️
+          </button>
+        </div>
+      </div>
+
+      <!-- Desktop Tab Links -->
+      <nav class="hidden lg:flex items-center gap-1 border-l border-hairline pl-3 ml-1">
+        <button data-tab="home" class="nav-tab-btn active px-3 py-1.5 text-xs font-bold text-primary bg-mint-50 rounded-xs uppercase tracking-wider">
+          Beranda
+        </button>
+        <button data-tab="wallets" class="nav-tab-btn px-3 py-1.5 text-xs font-bold text-muted hover:text-ink rounded-xs uppercase tracking-wider">
+          Dompet
+        </button>
+        <button data-tab="transactions" class="nav-tab-btn px-3 py-1.5 text-xs font-bold text-muted hover:text-ink rounded-xs uppercase tracking-wider">
+          Riwayat
+        </button>
+        <button data-tab="stats" class="nav-tab-btn px-3 py-1.5 text-xs font-bold text-muted hover:text-ink rounded-xs uppercase tracking-wider">
+          Laporan
+        </button>
+        <button data-tab="settings" class="nav-tab-btn px-3 py-1.5 text-xs font-bold text-muted hover:text-ink rounded-xs uppercase tracking-wider">
+          Setelan
+        </button>
+      </nav>
+
+      <!-- User Profile Pic / Logout -->
+      <div class="flex items-center pl-2 border-l border-hairline">
+        <button type="button" id="btnUserMenu" class="flex items-center gap-2 p-1 hover:bg-canvas-soft rounded-xs transition" title="Profil Akun Google">
+          <img id="navUserAvatar" src="/icon.svg" class="w-8 h-8 rounded-full border border-hairline object-cover" alt="Avatar" />
+        </button>
+      </div>
+    </div>
+
+  </div>
+</header>

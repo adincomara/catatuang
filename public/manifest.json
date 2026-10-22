@@ -1,14 +1,15 @@
 {
-  "name": "CatatUang - Catatan Keuangan",
+  "name": "CatatUang - Catatan Keuangan Pribadi",
   "short_name": "CatatUang",
-  "start_url": "./index.html",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#10b981",
+  "theme_color": "#008254",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "./icon.svg",
+      "src": "/icon.svg",
       "sizes": "192x192 512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"

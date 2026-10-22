@@ -1,0 +1,107 @@
+---
+// Tab: Home (Beranda)
+---
+
+<div id="tab-home" class="tab-pane space-y-6">
+  
+  <!-- Hero Editorial Summary Band (NerdWallet Spruce Rhythm) -->
+  <div class="bg-gradient-to-r from-primary via-primary-deep to-primary-forest rounded-lg p-5 lg:p-7 text-white shadow-flat-subtle">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-xs bg-lime-panel text-primary text-[11px] font-bold uppercase tracking-wider mb-2">
+          ✓ Ringkasan Keuangan
+        </div>
+        <h2 class="text-xl lg:text-2xl font-black tracking-tight text-white">
+          Arus Kas Periode Ini
+        </h2>
+        <p class="text-xs text-mint-100 font-light mt-0.5" id="homePeriodSubtitle">
+          Menampilkan transaksi aktif
+        </p>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button
+          type="button"
+          onclick="window.catatuangApp.openAddTransactionModal('expense')"
+          class="btn-spruce bg-white hover:bg-canvas-soft text-error px-4 py-3 text-xs uppercase shadow-sm"
+        >
+          ➖ Pengeluaran
+        </button>
+        <button
+          type="button"
+          onclick="window.catatuangApp.openAddTransactionModal('income')"
+          class="btn-spruce bg-lime-accent hover:bg-lime-hero text-primary-forest px-4 py-3 text-xs uppercase shadow-sm"
+        >
+          ➕ Pemasukan
+        </button>
+        <button
+          type="button"
+          onclick="window.catatuangApp.openAddTransactionModal('transfer')"
+          class="btn-spruce bg-primary-deep hover:bg-primary border border-mint-200 text-white px-4 py-3 text-xs uppercase shadow-sm"
+        >
+          🔄 Transfer
+        </button>
+      </div>
+    </div>
+
+    <!-- 3 Metric Pillars -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6 pt-5 border-t border-white/15">
+      <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xs border border-white/10">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-mint-100">Total Pemasukan</div>
+        <div id="homeIncomeDisplay" class="text-lg lg:text-xl font-black mt-1 text-white">Rp 0</div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xs border border-white/10">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-mint-100">Total Pengeluaran</div>
+        <div id="homeExpenseDisplay" class="text-lg lg:text-xl font-black mt-1 text-white">Rp 0</div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-sm p-4 rounded-xs border border-white/10">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-mint-100">Sisa / Selisih Bersih</div>
+        <div id="homeNetDisplay" class="text-lg lg:text-xl font-black mt-1 text-lime-panel">Rp 0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wallets & Accounts Strip -->
+  <div class="bg-white border border-hairline-strong rounded-lg p-5 shadow-flat-subtle">
+    <div class="flex items-center justify-between mb-3">
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-ink">Dompet & Rekening</h3>
+        <p class="text-[11px] text-muted">Akumulasi modal dan mutasi periode aktif</p>
+      </div>
+      <button
+        type="button"
+        onclick="window.catatuangApp.switchTab('wallets')"
+        class="text-xs font-bold text-primary hover:underline"
+      >
+        Kelola Semua Dompet →
+      </button>
+    </div>
+
+    <div id="homeWalletsList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+  <!-- Recent Transactions in Active Period -->
+  <div class="bg-white border border-hairline-strong rounded-lg p-5 shadow-flat-subtle">
+    <div class="flex items-center justify-between pb-3 border-b border-hairline mb-3">
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-ink">Transaksi Terbaru</h3>
+        <p class="text-[11px] text-muted">Daftar mutasi dalam rentang tanggal terpilih</p>
+      </div>
+      <button
+        type="button"
+        onclick="window.catatuangApp.switchTab('transactions')"
+        class="text-xs font-bold text-primary hover:underline"
+      >
+        Lihat Riwayat Lengkap →
+      </button>
+    </div>
+
+    <div id="homeRecentTxList" class="divide-y divide-hairline">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+</div>

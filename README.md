@@ -1,135 +1,80 @@
-# CatatUang - Personal Finance Mobile Web App
+# CatatUang - Financial Tracking Engine (Astro + Cloudflare Pages)
 
-Aplikasi pencatatan keuangan pribadi yang dioptimalkan untuk tampilan mobile, WebView Android, dan WKWebView iOS.
-
-## ✨ Fitur Utama
-- **Dashboard Ringkasan:** Total saldo bersih, total pemasukan vs pengeluaran bulan berjalan, dan daftar dompet aktif.
-- **Multi-Dompet / Akun:** Manajemen kas tunai, rekening bank (BCA, Mandiri, dll.), dan e-wallet (GoPay, OVO, ShopeePay, dll.).
-- **Pencatatan Cepat Transaksi:**
-  - Kategori lengkap dengan ikon/emoji khas kebutuhan Indonesia (Makanan, Bensin/Transport, Belanja, Tagihan, Gaji, dll.).
-  - Tombol nominal instan (+10rb, +20rb, +50rb, +100rb, +500rb).
-  - Pemasukan, Pengeluaran, dan Transfer antar dompet.
-- **Riwayat & Filter:** Pengelompokan riwayat per hari, pencarian teks, dan filter berdasarkan tipe atau dompet.
-- **Statistik & Analisis:** Donut chart kategori pengeluaran (berbasis Chart.js lokal) dan analisis persentase alokasi dana.
-- **Mode Gelap / Terang:** Mendukung preferensi UI modern.
-- **Cadangan Data:** Ekspor & Impor JSON, serta ekspor transaksi ke CSV/Excel.
-- **100% Offline-First:** Semua aset (CSS, Chart.js, Vector Icon) tersimpan lokal tanpa ketergantungan koneksi internet.
+Aplikasi pencatatan keuangan pribadi modern berbasis framework **Astro** dengan desain editorial utilitarian sesuai panduan `desain.md` (Spruce `#008254`, Mint ladder, dan sudut tegas). Mendukung tampilan responsif Web Desktop (1200px container) dan Mobile App Shell, Progressive Web App (PWA) untuk Android & iOS, serta deployment statis ke Cloudflare Pages.
 
 ---
 
-## 🚀 Menjalankan Secara Lokal / Development
-Jalankan server HTTP lokal di dalam direktori `finance-app`:
+## 🔒 Fitur Autentikasi Google Wajib & Isolasi Akun
+- **Mandatory Login Gate:** Aplikasi **HANYA** dapat diakses setelah berhasil login dengan akun Google Anda.
+- **Partisi Data Mandiri:** Setiap akun Google memiliki ruang penyimpanan `localStorage` terisolasi (`catatuang_u_<email>_*`). Saat berganti akun, data transaksi tidak akan bercampur.
+- **Konfigurasi Client ID:** Pengguna dapat menggunakan Google Client ID default atau memasukkan Client ID kustom melalui modal setelan.
+
+---
+
+## 📅 Fitur Custom Periode Tanggal (Date Range)
+- **Rentang Waktu Kustom:** Bebas menentukan tanggal mulai (`Dari Tanggal`) dan tanggal selesai (`Sampai Tanggal`).
+- **Pilihan Cepat (Presets):**
+  - *Bulan Ini*
+  - *Bulan Lalu*
+  - *7 Hari Terakhir*
+  - *30 Hari Terakhir*
+  - *Tahun Ini (Januari - Desember)*
+- **Kalkulasi Reaktif:** Seluruh saldo, ringkasan arus kas, mutasi transaksi, grafik kategori pengeluaran, dan ekspor spreadsheet otomatis menyesuaikan periode aktif yang dipilih.
+
+---
+
+## 🎨 Desain Berbasis `desain.md` (NerdWallet Style)
+- **Palet Warna:** Spruce Green `#008254`, Deep Spruce `#006642`, dan tangga mint (`#effcf8`, `#e3faf2`, `#b7ecda`).
+- **Aksen Tegas:** Lime panel `#e8fdac` untuk sorotan badge.
+- **Geometri:** Sudut tombol tegas `rounded-[2px]` dengan padding 16px, kartu `rounded-[8px]` dengan hairline border halus, tanpa bayangan tebal.
+- **Tipografi:** Kontras tinggi antara heading hitam pekat `#000000` (weight 700) dan teks isi `#3d4045` (weight 300).
+
+---
+
+## 📱 Progressive Web App (PWA) Android & iOS
+- **Android:** Dapat diinstal langsung ke Layar Utama (*Add to Home Screen*) melalui prompt browser atau menu Chrome.
+- **iOS (Safari):** Mendukung tampilan layar penuh mandiri (`standalone`), safe-area notch padding, dan icon home screen.
+- **Service Worker:** Caching network-first untuk performa instan dan ketersediaan offline.
+
+---
+
+## 🚀 Menjalankan Secara Lokal
+
+Pastikan Node.js v18+ atau v20+ terpasang (tersedia `.nvmrc` untuk Node 20):
 
 ```bash
-cd finance-app
-python3 -m http.server 8080
+# Gunakan node versi 20
+nvm use 20
+
+# Install dependensi
+npm install
+
+# Jalankan server lokal
+npm run dev
 ```
-Buka browser di `http://localhost:8080`.
+
+Buka browser di `http://localhost:4321`.
 
 ---
 
-## 📱 Integrasi ke Android WebView (Java / Kotlin)
+## ☁️ Deployment ke Cloudflare Pages
 
-### 1. Letakkan Berkas
-Salin seluruh file di dalam folder `finance-app/` ke dalam folder asset proyek Android Studio:
-`app/src/main/assets/`
-
-### 2. Berikan Izin di `AndroidManifest.xml` (Opsional jika ingin akses offline murni)
-```xml
-<uses-permission android:name="android.permission.INTERNET" />
-```
-
-### 3. Konfigurasi `MainActivity.kt`
-```kotlin
-package com.example.catatuang
-
-import android.annotation.SuppressLint
-import android.os.Bundle
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
-
-class MainActivity : AppCompatActivity() {
-    private lateinit var webView: WebView
-
-    @SuppressLint("SetJavaScriptEnabled")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        webView = findViewById(R.id.webview)
-        webView.webViewClient = WebViewClient()
-        webView.webChromeClient = WebChromeClient()
-
-        val settings = webView.settings
-        settings.javaScriptEnabled = true
-        settings.domStorageEnabled = true // Wajib untuk localStorage
-        settings.databaseEnabled = true
-        settings.allowFileAccess = true
-
-        webView.loadUrl("file:///android_asset/index.html")
-    }
-
-    override fun onBackPressed() {
-        if (webView.canGoBack()) {
-            webView.goBack()
-        } else {
-            super.onBackPressed()
-        }
-    }
-}
-```
+1. **Push ke Git Repository** (GitHub / GitLab).
+2. Di dashboard **Cloudflare Pages**:
+   - Klik **Create a project** > **Connect to Git**.
+   - Pilih repository `catatuang`.
+   - **Framework preset:** `Astro`
+   - **Build command:** `npm run build`
+   - **Build output directory:** `dist`
+   - **Environment variables:** Tambahkan `NODE_VERSION` = `20`
+3. Klik **Save and Deploy**. Selesai!
 
 ---
 
-## 🍏 Integrasi ke iOS WKWebView (Swift)
+## 🧪 Pengujian & Self-Check
 
-### 1. Letakkan Berkas
-Drag & drop folder `finance-app` ke dalam proyek Xcode Anda (pilih *"Create folder references"*).
-
-### 2. Kode `ViewController.swift`
-```swift
-import UIKit
-import WebKit
-
-class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate {
-    var webView: WKWebView!
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        let config = WKWebViewConfiguration()
-        config.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
-        
-        webView = WKWebView(frame: view.bounds, configuration: config)
-        webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
-        
-        view.addSubview(webView)
-
-        if let htmlPath = Bundle.main.path(forResource: "index", ofType: "html", inDirectory: "finance-app") {
-            let fileURL = URL(fileURLWithPath: htmlPath)
-            let folderURL = fileURL.deletingLastPathComponent()
-            webView.loadFileURL(fileURL, allowingReadAccessTo: folderURL)
-        }
-    }
-}
-```
-
----
-
-## ⚡ Opsi Alternatif: Build APK & iOS App via Capacitor
-Jika ingin membuat build native Android (`.apk`) dan iOS dengan satu perintah:
+Jalankan test assertion logika tanggal dan isolasi storage:
 
 ```bash
-cd finance-app
-npm init -y
-npm install @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios
-npx cap init CatatUang com.catatuang.app --web-dir .
-npx cap add android
-npx cap add ios
-npx cap open android
+npm test
 ```

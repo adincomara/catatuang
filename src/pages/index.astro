@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import LoginGate from '../components/LoginGate.astro';
+import Navbar from '../components/Navbar.astro';
+import HomeTab from '../components/HomeTab.astro';
+import WalletsTab from '../components/WalletsTab.astro';
+import TransactionsTab from '../components/TransactionsTab.astro';
+import StatsTab from '../components/StatsTab.astro';
+import SettingsTab from '../components/SettingsTab.astro';
+import MobileBottomNav from '../components/MobileBottomNav.astro';
+import PeriodModal from '../components/PeriodModal.astro';
+import TransactionModal from '../components/TransactionModal.astro';
+import WalletModal from '../components/WalletModal.astro';
+import TransactionDetailModal from '../components/TransactionDetailModal.astro';
+import GoogleClientIdModal from '../components/GoogleClientIdModal.astro';
+---
+
+<Layout title="CatatUang - Catatan Keuangan Pribadi">
+  
+  <!-- MANDATORY GOOGLE LOGIN GATE (ONLY DISPLAYED WHEN NOT LOGGED IN) -->
+  <LoginGate />
+
+  <!-- MAIN APP VIEW (LOCKED BEHIND GOOGLE AUTH) -->
+  <div id="mainAppView" class="hidden min-h-screen flex flex-col bg-canvas-soft">
+    
+    <!-- Top Responsive Navbar -->
+    <Navbar />
+
+    <!-- Main Container (1200px Grid as per design.md) -->
+    <main class="flex-1 w-full max-w-[1200px] mx-auto px-4 lg:px-8 py-5 pb-24 lg:pb-12">
+      <!-- 5 Tab Views -->
+      <HomeTab />
+      <WalletsTab />
+      <TransactionsTab />
+      <StatsTab />
+      <SettingsTab />
+    </main>
+
+    <!-- Mobile Bottom Navigation (< 1024px) -->
+    <MobileBottomNav />
+
+    <!-- Interactive Modals / Bottom Sheets -->
+    <PeriodModal />
+    <TransactionModal />
+    <WalletModal />
+    <TransactionDetailModal />
+    <GoogleClientIdModal />
+
+    <!-- Global Toast Feedback -->
+    <div
+      id="appToast"
+      class="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-200 px-4 py-2.5 bg-ink text-white text-xs font-bold rounded-xs shadow-flat-overlay flex items-center gap-2"
+    >
+    </div>
+
+  </div>
+
+  <!-- Client State & App Bootstrapper -->
+  <script>
+    import { initCatatUang } from '../scripts/app-client.js';
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initCatatUang);
+    } else {
+      initCatatUang();
+    }
+  </script>
+</Layout>

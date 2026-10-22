@@ -1,0 +1,9 @@
+name = "catatuang"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "catatuang-db"
+database_id = "local-d1-catatuang" # Ponytail: Diganti dengan D1 ID produksi Cloudflare

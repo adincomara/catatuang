@@ -1,0 +1,146 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "CatatUang - Catatan Keuangan Pribadi" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#008254" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="CatatUang" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <title>{title}</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+
+  <!-- Fonts: Inter / Montserrat substitute for geometric Gotham feel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Chart.js & SheetJS for local high-speed rendering -->
+  <script is:inline src="/chart.min.js"></script>
+  <script is:inline src="/xlsx.full.min.js"></script>
+
+  <style is:global>
+    :root {
+      --color-primary: #008254;
+      --color-primary-deep: #006642;
+      --color-canvas: #ffffff;
+      --color-canvas-soft: #f7f7f7;
+      --color-hairline: #ebebec;
+      --color-hairline-strong: #d8d9da;
+      --color-ink: #000000;
+      --color-body: #3d4045;
+      --color-muted: #64666a;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f7f7f7;
+      color: #3d4045;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Utilitarian NerdWallet button shape: flat padding, nearly square corners (2px) */
+    .btn-spruce {
+      background-color: #008254;
+      color: #ffffff;
+      border-radius: 2px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+    .btn-spruce:hover {
+      background-color: #006642;
+    }
+    .btn-spruce:active {
+      transform: scale(0.98);
+    }
+
+    .btn-soft {
+      background-color: #f7f7f7;
+      color: #008254;
+      border-radius: 2px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border: 1px solid #ebebec;
+    }
+    .btn-soft:hover {
+      background-color: #effcf8;
+    }
+
+    .btn-outline-util {
+      color: #008254;
+      border: 1px solid #d8d9da;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      background-color: #ffffff;
+    }
+    .btn-outline-util:hover {
+      background-color: #effcf8;
+      border-color: #008254;
+    }
+
+    /* Modal / Sheet transitions */
+    .modal-backdrop {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-panel {
+      transform: translateY(20px);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-backdrop.active .modal-panel {
+      transform: translateY(0);
+    }
+
+    /* Hide scrollbars for clean UI rails */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Safe area padding for mobile notches */
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-mint-200 selection:text-ink">
+  <slot />
+
+  <script>
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.warn('SW registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+---
+// Mobile Bottom Navigation Bar (Visible only on < 1024px)
+---
+
+<nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-hairline px-3 py-2 safe-bottom">
+  <div class="max-w-md mx-auto flex items-center justify-around relative">
+    
+    <button data-tab="home" class="mobile-nav-btn active flex flex-col items-center justify-center flex-1 py-1 text-primary transition">
+      <span class="text-lg">🏠</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Beranda</span>
+    </button>
+
+    <button data-tab="wallets" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-muted transition">
+      <span class="text-lg">👛</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Dompet</span>
+    </button>
+
+    <!-- Center Floating Action Button -->
+    <div class="flex-1 flex justify-center -mt-6">
+      <button
+        type="button"
+        onclick="window.catatuangApp.openAddTransactionModal('expense')"
+        class="w-12 h-12 rounded-full bg-primary hover:bg-primary-deep text-white shadow-lg flex items-center justify-center text-xl font-bold active:scale-95 transition"
+        aria-label="Catat Transaksi"
+      >
+        +
+      </button>
+    </div>
+
+    <button data-tab="stats" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-muted transition">
+      <span class="text-lg">📊</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Laporan</span>
+    </button>
+
+    <button data-tab="settings" class="mobile-nav-btn flex flex-col items-center justify-center flex-1 py-1 text-muted transition">
+      <span class="text-lg">⚙️</span>
+      <span class="text-[10px] font-bold uppercase tracking-wider">Setelan</span>
+    </button>
+
+  </div>
+</nav>

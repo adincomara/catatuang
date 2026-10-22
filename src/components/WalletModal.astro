@@ -1,0 +1,69 @@
+---
+// Wallet Add / Edit Modal
+---
+
+<div id="walletModal" class="modal-backdrop fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="modal-panel bg-white w-full sm:max-w-md rounded-t-lg sm:rounded-lg border border-hairline-strong shadow-flat-overlay overflow-hidden">
+    
+    <div class="p-4 border-b border-hairline flex items-center justify-between bg-canvas-soft">
+      <h3 id="modalWalletTitle" class="text-sm font-bold text-ink uppercase tracking-wider">Tambah Dompet Baru</h3>
+      <button type="button" class="btn-close-wallet-modal text-muted hover:text-ink text-base p-1">✕</button>
+    </div>
+
+    <div class="p-5 space-y-4">
+      <input type="hidden" id="editingWalletId" value="" />
+
+      <div>
+        <label class="block text-xs font-semibold text-body mb-1">Nama Dompet / Rekening</label>
+        <input
+          type="text"
+          id="walletNameInput"
+          placeholder="Contoh: BCA Utama, Dompet Tunai, OVO"
+          class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-body mb-1">Tipe Akun</label>
+        <select
+          id="walletTypeInput"
+          class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink font-semibold focus:outline-none focus:border-primary"
+        >
+          <option value="bank">Rekening Bank</option>
+          <option value="ewallet">E-Wallet (GoPay, OVO, Dana)</option>
+          <option value="cash">Uang Tunai (Cash)</option>
+          <option value="credit">Kartu Kredit / Paylater</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-body mb-1">Saldo Awal / Modal (Rp)</label>
+        <div class="relative">
+          <span class="absolute left-3 top-2.5 text-xs font-bold text-muted">Rp</span>
+          <input
+            type="number"
+            id="walletBalanceInput"
+            placeholder="0"
+            class="w-full pl-9 pr-3 py-2.5 text-sm font-bold bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+          />
+        </div>
+        <p class="text-[11px] text-muted mt-1">Saldo modal saat dompet pertama kali dibuat.</p>
+      </div>
+    </div>
+
+    <div class="p-4 bg-canvas-soft border-t border-hairline flex items-center justify-between">
+      <button
+        type="button"
+        id="btnDeleteWalletAction"
+        class="hidden text-xs font-bold text-error uppercase hover:underline"
+      >
+        Hapus Dompet
+      </button>
+      <div class="flex items-center gap-2 ml-auto">
+        <button type="button" class="btn-close-wallet-modal btn-soft px-4 py-2.5 text-xs uppercase">Batal</button>
+        <button type="button" id="btnSaveWallet" class="btn-spruce px-5 py-2.5 text-xs uppercase">Simpan</button>
+      </div>
+    </div>
+
+  </div>
+</div>

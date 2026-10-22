@@ -1,0 +1,74 @@
+---
+// Mandatory Google Login Gate
+// The application can ONLY be accessed when logged into Google.
+---
+
+<div id="loginGateView" class="fixed inset-0 z-50 bg-canvas flex flex-col justify-between p-6 overflow-y-auto">
+  <div class="max-w-md w-full mx-auto my-auto flex flex-col items-center text-center py-8">
+    
+    <!-- Hero Spruce Badge -->
+    <div class="w-20 h-20 bg-primary flex items-center justify-center rounded-lg shadow-flat-subtle mb-6">
+      <img src="/icon.svg" class="w-12 h-12" alt="Logo CatatUang" />
+    </div>
+
+    <div class="space-y-2 mb-8">
+      <div class="inline-block px-3 py-1 bg-lime-panel text-primary text-xs font-bold uppercase tracking-wider rounded-xs">
+        Financial Engine
+      </div>
+      <h1 class="text-3xl font-extrabold text-ink tracking-tight">
+        CatatUang
+      </h1>
+      <p class="text-sm font-light text-muted max-w-sm mx-auto leading-relaxed">
+        Pencatatan keuangan pribadi dengan data aman, mandiri, dan terisolasi per akun Google.
+      </p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="w-full bg-white border border-hairline-strong rounded-lg p-6 space-y-4 shadow-flat-subtle text-left">
+      <div class="text-xs font-bold uppercase tracking-wider text-muted border-b border-hairline pb-3">
+        Autentikasi Akun
+      </div>
+
+      <p class="text-xs text-body leading-relaxed">
+        Aplikasi ini memerlukan akun Google untuk memisahkan data transaksi Anda secara aman di browser ini.
+      </p>
+
+      <button
+        type="button"
+        id="btnGoogleLogin"
+        class="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white hover:bg-canvas-soft border border-hairline-strong rounded-xs text-ink font-bold text-xs uppercase tracking-wider active:scale-[0.99] transition"
+      >
+        <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+          <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z"/>
+          <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/>
+          <path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.8s.2-2.1.4-2.8L1.9 6.3C.7 8.7 0 10.3 0 12s.7 3.3 1.9 5.7l3.7-2.9z"/>
+          <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.4C3.7 20.4 7.5 23 12 23z"/>
+        </svg>
+        <span>Masuk dengan Google</span>
+      </button>
+
+      <!-- Localhost Dev Bypass (Only visible when running on localhost / 127.0.0.1) -->
+      <div id="devBypassBox" class="hidden pt-2 border-t border-dashed border-hairline">
+        <button
+          type="button"
+          id="btnDevBypassLogin"
+          class="w-full py-2.5 px-3 bg-mint-50 hover:bg-mint-100 border border-mint-200 rounded-xs text-primary font-bold text-xs uppercase tracking-wider transition flex items-center justify-center gap-2"
+        >
+          <span>⚡</span>
+          <span>Bypass Login (Khusus Dev Lokal)</span>
+        </button>
+      </div>
+
+      <div class="pt-2 flex items-center justify-between text-[11px] text-muted">
+        <span>🔒 Data terenkripsi di browser Anda</span>
+        <button type="button" id="btnOpenClientIdConfig" class="text-primary hover:underline font-medium">
+          Atur Client ID
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-md w-full mx-auto text-center text-xs text-faint pb-2">
+    CatatUang v2.0 • NerdWallet Engine UI • Cloudflare Ready
+  </div>
+</div>

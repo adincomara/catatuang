@@ -1,0 +1,21 @@
+{
+  "name": "catatuang",
+  "version": "1.0.0",
+  "description": "Aplikasi pencatatan keuangan pribadi yang dioptimalkan untuk tampilan mobile, WebView Android, dan WKWebView iOS.",
+  "main": "app.js",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "node test/period-and-storage.test.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@astrojs/cloudflare": "^11.2.0",
+    "@astrojs/tailwind": "^5.1.5",
+    "astro": "^4.16.19",
+    "tailwindcss": "^3.4.19"
+  }
+}

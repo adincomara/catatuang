@@ -1,0 +1,56 @@
+---
+// Tab: Stats (Statistik & Distribusi Pengeluaran)
+---
+
+<div id="tab-stats" class="tab-pane hidden space-y-6">
+  
+  <!-- Period Header Card -->
+  <div class="bg-white border border-hairline-strong rounded-lg p-5 shadow-flat-subtle">
+    <div class="border-b border-hairline pb-3 mb-4">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-ink">Laporan & Distribusi Finansial</h3>
+      <p class="text-[11px] text-muted" id="statsPeriodLabel">Periode Aktif</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+      <div class="p-3 bg-mint-50 border border-mint-100 rounded-xs">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-muted">Pemasukan</div>
+        <div id="statsIncomeVal" class="text-base font-black text-primary mt-1">Rp 0</div>
+      </div>
+      <div class="p-3 bg-canvas-soft border border-hairline rounded-xs">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-muted">Pengeluaran</div>
+        <div id="statsExpenseVal" class="text-base font-black text-error mt-1">Rp 0</div>
+      </div>
+      <div class="p-3 bg-canvas-soft border border-hairline rounded-xs">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-muted">Selisih Bersih</div>
+        <div id="statsNetVal" class="text-base font-black text-ink mt-1">Rp 0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart & Category Breakdown Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Donut Chart Column -->
+    <div class="lg:col-span-5 bg-white border border-hairline-strong rounded-lg p-5 shadow-flat-subtle flex flex-col items-center justify-center">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-ink self-start mb-4">
+        Grafik Pengeluaran
+      </h4>
+      <div class="w-full h-56 relative flex items-center justify-center">
+        <canvas id="statsChartCanvas"></canvas>
+      </div>
+      <p class="text-[11px] text-muted text-center mt-3">
+        Persentase pengeluaran berdasarkan kategori dalam rentang waktu yang dipilih.
+      </p>
+    </div>
+
+    <!-- Category Detail Breakdown List -->
+    <div class="lg:col-span-7 bg-white border border-hairline-strong rounded-lg p-5 shadow-flat-subtle">
+      <h4 class="text-xs font-bold uppercase tracking-wider text-ink mb-4 border-b border-hairline pb-3">
+        Rincian Kategori Pengeluaran
+      </h4>
+      <div id="statsCategoryList" class="space-y-3">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+</div>

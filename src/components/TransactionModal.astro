@@ -1,0 +1,156 @@
+---
+// Transaction Add / Edit Modal (Bottom Sheet on mobile, Centered dialog on desktop)
+---
+
+<div id="transactionModal" class="modal-backdrop fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="modal-panel bg-white w-full sm:max-w-md rounded-t-lg sm:rounded-lg border border-hairline-strong shadow-flat-overlay max-h-[92vh] flex flex-col overflow-hidden">
+    
+    <!-- Modal Header -->
+    <div class="p-4 border-b border-hairline flex items-center justify-between bg-canvas-soft shrink-0">
+      <div>
+        <h3 id="modalTxTitle" class="text-sm font-bold text-ink uppercase tracking-wider">Catat Transaksi</h3>
+      </div>
+      <button type="button" class="btn-close-tx-modal text-muted hover:text-ink text-base p-1">
+        ✕
+      </button>
+    </div>
+
+    <!-- Quick Scan AI Nota -->
+    <div class="p-4 border-b border-hairline bg-mint-50/50 shrink-0">
+      <input type="file" id="cameraReceiptInput" accept="image/*" capture="environment" class="hidden" />
+      <input type="file" id="galleryReceiptInput" accept="image/*" class="hidden" />
+      
+      <div class="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onclick="document.getElementById('cameraReceiptInput').click()"
+          class="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-hairline rounded-xs text-xs font-semibold text-primary hover:bg-mint-50 transition"
+        >
+          <span>📷</span> Foto Struk
+        </button>
+        <button
+          type="button"
+          onclick="document.getElementById('galleryReceiptInput').click()"
+          class="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-hairline rounded-xs text-xs font-semibold text-body hover:bg-mint-50 transition"
+        >
+          <span>🖼️</span> Pilih Galeri
+        </button>
+      </div>
+      <div id="receiptScanStatus" class="hidden text-center text-xs font-semibold text-primary mt-2"></div>
+    </div>
+
+    <!-- Form Content (Scrollable) -->
+    <div class="p-5 overflow-y-auto no-scrollbar space-y-4">
+      
+      <!-- Type Switch -->
+      <div class="grid grid-cols-3 bg-canvas-soft p-1 rounded-xs border border-hairline">
+        <button type="button" data-type="expense" class="tx-modal-type-btn py-2 text-xs font-bold rounded-xs bg-white text-error shadow-sm uppercase tracking-wider">
+          Pengeluaran
+        </button>
+        <button type="button" data-type="income" class="tx-modal-type-btn py-2 text-xs font-bold rounded-xs text-muted uppercase tracking-wider">
+          Pemasukan
+        </button>
+        <button type="button" data-type="transfer" class="tx-modal-type-btn py-2 text-xs font-bold rounded-xs text-muted uppercase tracking-wider">
+          Transfer
+        </button>
+      </div>
+
+      <!-- Nominal Input -->
+      <div>
+        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Nominal (Rp)</label>
+        <div class="relative">
+          <span class="absolute left-3.5 top-2.5 text-lg font-bold text-muted">Rp</span>
+          <input
+            type="number"
+            id="txModalAmount"
+            placeholder="0"
+            class="w-full pl-12 pr-4 py-2.5 text-2xl font-black bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+          />
+        </div>
+        <!-- Quick nominal pills -->
+        <div class="flex items-center gap-1.5 mt-2 overflow-x-auto no-scrollbar">
+          <button type="button" class="btn-quick-amt px-2.5 py-1 text-[11px] font-semibold bg-canvas-soft border border-hairline hover:border-primary rounded-xs shrink-0" data-amt="10000">+10rb</button>
+          <button type="button" class="btn-quick-amt px-2.5 py-1 text-[11px] font-semibold bg-canvas-soft border border-hairline hover:border-primary rounded-xs shrink-0" data-amt="20000">+20rb</button>
+          <button type="button" class="btn-quick-amt px-2.5 py-1 text-[11px] font-semibold bg-canvas-soft border border-hairline hover:border-primary rounded-xs shrink-0" data-amt="50000">+50rb</button>
+          <button type="button" class="btn-quick-amt px-2.5 py-1 text-[11px] font-semibold bg-canvas-soft border border-hairline hover:border-primary rounded-xs shrink-0" data-amt="100000">+100rb</button>
+          <button type="button" class="btn-quick-amt px-2.5 py-1 text-[11px] font-semibold bg-canvas-soft border border-hairline hover:border-primary rounded-xs shrink-0" data-amt="500000">+500rb</button>
+        </div>
+      </div>
+
+      <!-- Wallet Selection -->
+      <div class="grid grid-cols-1 gap-3">
+        <div>
+          <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1" id="labelSourceWallet">
+            Dompet / Rekening
+          </label>
+          <select
+            id="txModalSourceWallet"
+            class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink font-semibold focus:outline-none focus:border-primary"
+          >
+            <!-- Injected -->
+          </select>
+        </div>
+
+        <div id="boxTargetWallet" class="hidden">
+          <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+            Ke Dompet Tujuan
+          </label>
+          <select
+            id="txModalTargetWallet"
+            class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink font-semibold focus:outline-none focus:border-primary"
+          >
+            <!-- Injected -->
+          </select>
+        </div>
+      </div>
+
+      <!-- Category Grid (Expense / Income) -->
+      <div id="boxCategorySelect">
+        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-2">Pilih Kategori</label>
+        <div id="txCategoryGrid" class="grid grid-cols-4 gap-2">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Date & Time Local -->
+      <div>
+        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Tanggal & Waktu</label>
+        <input
+          type="datetime-local"
+          id="txModalDateTime"
+          class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+        />
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Catatan (Opsional)</label>
+        <input
+          type="text"
+          id="txModalNote"
+          placeholder="Contoh: Belanja bulanan di minimarket"
+          class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+        />
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-4 bg-canvas-soft border-t border-hairline flex items-center justify-end gap-2 shrink-0">
+      <button
+        type="button"
+        class="btn-close-tx-modal btn-soft px-4 py-2.5 text-xs uppercase"
+      >
+        Batal
+      </button>
+      <button
+        type="button"
+        id="btnSaveTransaction"
+        class="btn-spruce px-5 py-2.5 text-xs uppercase"
+      >
+        Simpan Transaksi
+      </button>
+    </div>
+
+  </div>
+</div>

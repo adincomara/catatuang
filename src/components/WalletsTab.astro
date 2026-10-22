@@ -1,0 +1,42 @@
+---
+// Tab: Wallets (Dompet & Rekening)
+---
+
+<div id="tab-wallets" class="tab-pane hidden space-y-6">
+  
+  <!-- Networth Card -->
+  <div class="bg-mint-50 border border-mint-200 rounded-lg p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <span class="inline-block px-2.5 py-0.5 rounded-xs bg-primary text-white text-[10px] font-bold uppercase tracking-wider mb-2">
+        Total Kekayaan Bersih
+      </span>
+      <h2 class="text-2xl lg:text-3xl font-black text-ink" id="walletsNetworthDisplay">
+        Rp 0
+      </h2>
+      <p class="text-xs text-muted mt-1">
+        Dihitung dari akumulasi modal saldo awal dan seluruh mutasi transaksi periode ini.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      onclick="window.catatuangApp.openAddWalletModal()"
+      class="btn-spruce px-5 py-3 text-xs uppercase self-start md:self-center shrink-0"
+    >
+      + Tambah Dompet Baru
+    </button>
+  </div>
+
+  <!-- Wallets Container -->
+  <div class="bg-white border border-hairline-strong rounded-lg p-5 space-y-4 shadow-flat-subtle">
+    <div class="border-b border-hairline pb-3">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-ink">Daftar Dompet Aktif</h3>
+      <p class="text-[11px] text-muted">Kelola akun bank, e-wallet, dan uang tunai Anda</p>
+    </div>
+
+    <div id="walletsListFull" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+
+</div>
