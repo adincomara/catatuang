@@ -6,9 +6,20 @@
   
   <!-- Period Header Card -->
   <div class="bg-white border border-hairline-strong rounded-lg p-5 shadow-flat-subtle">
-    <div class="border-b border-hairline pb-3 mb-4">
-      <h3 class="text-xs font-bold uppercase tracking-wider text-ink">Laporan & Distribusi Finansial</h3>
-      <p class="text-[11px] text-muted" id="statsPeriodLabel">Periode Aktif</p>
+    <div class="border-b border-hairline pb-3 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-ink">Laporan & Distribusi Finansial</h3>
+        <p class="text-[11px] text-muted" id="statsPeriodLabel">Periode Aktif</p>
+      </div>
+      <button
+        type="button"
+        id="btnExportStatsXLSX"
+        class="inline-flex items-center justify-center gap-2 px-3.5 py-2 bg-mint-50 hover:bg-mint-100 border border-mint-200 text-primary font-bold text-xs uppercase tracking-wider rounded-xs transition active:scale-[0.98] shrink-0"
+        title="Unduh laporan periode aktif ke format Excel / Google Sheets"
+      >
+        <span>📊</span>
+        <span>Ekspor Excel / Sheets</span>
+      </button>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">

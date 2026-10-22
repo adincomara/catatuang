@@ -91,8 +91,7 @@ export class AppState {
   constructor() {
     this.googleUser = this.loadRaw('catatuang_auth_user', null);
     this.settings = this.loadRaw('catatuang_settings', {
-      hideBalance: false,
-      googleClientId: ''
+      hideBalance: false
     });
 
     // Custom period state

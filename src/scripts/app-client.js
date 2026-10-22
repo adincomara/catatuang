@@ -202,7 +202,6 @@ export function renderApp() {
   renderWallets();
   renderTransactions();
   renderStats();
-  renderSettings();
 }
 
 function renderHeader() {
@@ -219,6 +218,21 @@ function renderHeader() {
   const avatar = document.getElementById('navUserAvatar');
   if (avatar && state.googleUser && state.googleUser.picture) {
     avatar.src = state.googleUser.picture;
+  }
+
+  const dropdownAvatar = document.getElementById('dropdownUserAvatar');
+  if (dropdownAvatar && state.googleUser && state.googleUser.picture) {
+    dropdownAvatar.src = state.googleUser.picture;
+  }
+
+  const dropdownName = document.getElementById('dropdownUserName');
+  if (dropdownName && state.googleUser) {
+    dropdownName.textContent = state.googleUser.name || 'Pengguna Google';
+  }
+
+  const dropdownEmail = document.getElementById('dropdownUserEmail');
+  if (dropdownEmail && state.googleUser) {
+    dropdownEmail.textContent = state.googleUser.email || '';
   }
 
   updateSyncUI();
@@ -517,18 +531,6 @@ function renderStats() {
         }
       });
     }
-  }
-}
-
-function renderSettings() {
-  if (state.googleUser) {
-    const nameEl = document.getElementById('settingsUserName');
-    const emailEl = document.getElementById('settingsUserEmail');
-    const avatarEl = document.getElementById('settingsUserAvatar');
-
-    if (nameEl) nameEl.textContent = state.googleUser.name || 'Pengguna Google';
-    if (emailEl) emailEl.textContent = state.googleUser.email || '';
-    if (avatarEl && state.googleUser.picture) avatarEl.src = state.googleUser.picture;
   }
 }
 
@@ -999,40 +1001,10 @@ export function saveWallet() {
   triggerAutoSync(true);
 }
 
-// Google Client ID Config Modal
-export function openGoogleClientIdModal() {
-  const modal = document.getElementById('googleClientIdModal');
-  const input = document.getElementById('inputGoogleClientId');
-  if (input) {
-    input.value = (state && state.settings && state.settings.googleClientId)
-      ? state.settings.googleClientId
-      : DEFAULT_GOOGLE_CLIENT_ID;
-  }
-  if (modal) modal.classList.add('active');
-}
-
-export function closeGoogleClientIdModal() {
-  const modal = document.getElementById('googleClientIdModal');
-  if (modal) modal.classList.remove('active');
-}
-
-export function saveGoogleClientId() {
-  const input = document.getElementById('inputGoogleClientId');
-  const val = input ? input.value.trim() : '';
-  if (state && state.settings) {
-    state.settings.googleClientId = val;
-    state.saveRaw('catatuang_settings', state.settings);
-    showToast('Google Client ID berhasil disimpan!');
-  }
-  closeGoogleClientIdModal();
-}
-
 // --- GOOGLE AUTHENTICATION (MANDATORY GATE) ---
 
 export function loginWithGoogle() {
-  const clientId = (state && state.settings && state.settings.googleClientId && state.settings.googleClientId.trim())
-    ? state.settings.googleClientId.trim()
-    : DEFAULT_GOOGLE_CLIENT_ID;
+  const clientId = DEFAULT_GOOGLE_CLIENT_ID;
 
   if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.oauth2) {
     showToast('Sedang memuat SDK Google, coba 2 detik lagi...');
@@ -1153,87 +1125,6 @@ export function exportXLSX() {
   showToast(`File Excel ${filename} berhasil diunduh!`);
 }
 
-export function exportCSV() {
-  const periodTxs = state.getPeriodTransactions();
-  if (periodTxs.length === 0) {
-    showToast('Tidak ada transaksi di periode ini.');
-    return;
-  }
-
-  const headers = ['No,Tanggal,Waktu,Tipe,Kategori,Dompet,Nominal,Catatan'];
-  const lines = periodTxs.map((t, idx) => {
-    const cat = t.type === 'transfer' ? 'Transfer' : getCategory(t.type, t.category).name;
-    const w = getWallet(t.walletId).name;
-    const d = new Date(t.date);
-    return `${idx + 1},"${d.toLocaleDateString('id-ID')}","${d.toLocaleTimeString('id-ID')}","${t.type}","${cat}","${w}",${t.amount},"${(t.note || '').replace(/"/g, '""')}"`;
-  });
-
-  const blob = new Blob([headers.concat(lines).join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `CatatUang_${state.startDate}_${state.endDate}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('File CSV berhasil diunduh!');
-}
-
-export function backupJSON() {
-  const data = {
-    user: state.googleUser?.email,
-    backupDate: new Date().toISOString(),
-    wallets: state.wallets,
-    transactions: state.transactions
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `CatatUang_Backup_${formatToDateKey(new Date())}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Cadangan data JSON berhasil diunduh.');
-}
-
-export function restoreJSON(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (Array.isArray(data.wallets) && Array.isArray(data.transactions)) {
-        state.wallets = data.wallets;
-        state.transactions = data.transactions;
-        state.saveUserData();
-        renderApp();
-        showToast('Data berhasil dipulihkan dari file JSON!');
-      } else {
-        showToast('Format file JSON tidak sesuai.');
-      }
-    } catch {
-      showToast('Gagal membaca file JSON.');
-    }
-  };
-  reader.readAsText(file);
-}
-
-export function loadSampleData() {
-  if (!confirm('Muat data simulasi transaksi?')) return;
-  const now = Date.now();
-  const sampleTxs = [
-    { id: 'tx_s1', type: 'income', amount: 7500000, category: 'salary', walletId: 'w2', date: new Date(now - 86400000 * 2).toISOString(), note: 'Gaji Bulanan' },
-    { id: 'tx_s2', type: 'expense', amount: 45000, category: 'food', walletId: 'w1', date: new Date(now - 86400000).toISOString(), note: 'Makan Siang' },
-    { id: 'tx_s3', type: 'expense', amount: 35000, category: 'transport', walletId: 'w3', date: new Date(now - 86400000 * 3).toISOString(), note: 'Bensin & Tol' },
-    { id: 'tx_s4', type: 'expense', amount: 150000, category: 'bills', walletId: 'w2', date: new Date(now - 86400000 * 4).toISOString(), note: 'Tagihan Listrik' },
-    { id: 'tx_s5', type: 'transfer', amount: 200000, walletId: 'w2', targetWalletId: 'w3', date: new Date().toISOString(), note: 'Top up GoPay' }
-  ];
-
-  state.transactions = sampleTxs;
-  state.saveUserData();
-  renderApp();
-  showToast('Data contoh berhasil dimuat!');
-}
-
 export function resetAllUserData() {
   if (confirm('YAKIN ingin menghapus seluruh data catatan akun ini? Tindakan ini tidak dapat dibatalkan.')) {
     state.transactions = [];
@@ -1299,16 +1190,9 @@ export function initCatatUang() {
     openEditWalletModal,
     closeWalletModal,
     saveWallet,
-    openGoogleClientIdModal,
-    closeGoogleClientIdModal,
-    saveGoogleClientId,
     loginWithGoogle,
     logoutGoogle,
     exportXLSX,
-    exportCSV,
-    backupJSON,
-    restoreJSON,
-    loadSampleData,
     resetAllUserData
   };
 
@@ -1327,39 +1211,6 @@ export function initCatatUang() {
 function setupListeners() {
   // Login Gate
   document.getElementById('btnGoogleLogin')?.addEventListener('click', loginWithGoogle);
-  document.getElementById('btnOpenClientIdConfig')?.addEventListener('click', openGoogleClientIdModal);
-  document.getElementById('btnOpenClientIdSettings')?.addEventListener('click', openGoogleClientIdModal);
-  document.getElementById('btnSaveGoogleClientId')?.addEventListener('click', saveGoogleClientId);
-  document.querySelectorAll('.btn-close-clientid-modal').forEach(b => b.addEventListener('click', closeGoogleClientIdModal));
-
-  // Dev Localhost Bypass (Only active on localhost / 127.0.0.1)
-  const isLocalhost = typeof window !== 'undefined' && (
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1' ||
-    window.location.hostname === ''
-  );
-  const devBox = document.getElementById('devBypassBox');
-  if (devBox && isLocalhost) {
-    devBox.classList.remove('hidden');
-  }
-
-  document.getElementById('btnDevBypassLogin')?.addEventListener('click', () => {
-    state.googleUser = {
-      id: 'dev_local',
-      name: 'Developer Lokal',
-      email: 'dev@localhost',
-      picture: '/icon.svg'
-    };
-    state.saveRaw('catatuang_auth_user', state.googleUser);
-    state.loadUserData();
-    if (!state.wallets || state.wallets.length === 0) {
-      state.wallets = DEFAULT_WALLETS;
-      state.saveUserData();
-    }
-    renderApp();
-    showToast('Berhasil masuk dalam mode Dev Lokal!');
-    triggerAutoSync(true);
-  });
 
   // Navbar & Period
   document.getElementById('btnOpenPeriodModal')?.addEventListener('click', openPeriodModal);
@@ -1393,8 +1244,37 @@ function setupListeners() {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  // User menu in navbar
-  document.getElementById('btnUserMenu')?.addEventListener('click', () => switchTab('settings'));
+  // Account Dropdown Menu in Navbar
+  const userMenuBtn = document.getElementById('btnUserMenu');
+  const accountDropdown = document.getElementById('userAccountDropdown');
+
+  userMenuBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    accountDropdown?.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (accountDropdown && !accountDropdown.classList.contains('hidden')) {
+      if (!accountDropdown.contains(e.target) && !userMenuBtn?.contains(e.target)) {
+        accountDropdown.classList.add('hidden');
+      }
+    }
+  });
+
+  // Account Dropdown & Export Actions
+  document.getElementById('btnLogoutGoogle')?.addEventListener('click', () => {
+    accountDropdown?.classList.add('hidden');
+    logoutGoogle();
+  });
+  document.getElementById('btnDropdownExport')?.addEventListener('click', () => {
+    accountDropdown?.classList.add('hidden');
+    exportXLSX();
+  });
+  document.getElementById('btnDropdownReset')?.addEventListener('click', () => {
+    accountDropdown?.classList.add('hidden');
+    resetAllUserData();
+  });
+  document.getElementById('btnExportStatsXLSX')?.addEventListener('click', exportXLSX);
 
   // Transaction Modal
   document.querySelectorAll('.btn-close-tx-modal').forEach(b => b.addEventListener('click', closeTransactionModal));
@@ -1446,19 +1326,6 @@ function setupListeners() {
       });
       renderTransactions();
     });
-  });
-
-  // Settings tab actions
-  document.getElementById('btnLogoutGoogle')?.addEventListener('click', logoutGoogle);
-  document.getElementById('btnExportXLSX')?.addEventListener('click', exportXLSX);
-  document.getElementById('btnExportCSV')?.addEventListener('click', exportCSV);
-  document.getElementById('btnBackupJSON')?.addEventListener('click', backupJSON);
-  document.getElementById('btnLoadSampleData')?.addEventListener('click', loadSampleData);
-  document.getElementById('btnResetAllUserData')?.addEventListener('click', resetAllUserData);
-  
-  const restoreInput = document.getElementById('inputRestoreJSON');
-  restoreInput?.addEventListener('change', (e) => {
-    if (e.target.files?.[0]) restoreJSON(e.target.files[0]);
   });
 
   // Cloudflare D1 Sync Listeners

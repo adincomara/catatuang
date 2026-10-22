@@ -87,16 +87,70 @@
         <button data-tab="stats" class="nav-tab-btn px-3 py-1.5 text-xs font-bold text-muted hover:text-ink rounded-xs uppercase tracking-wider">
           Laporan
         </button>
-        <button data-tab="settings" class="nav-tab-btn px-3 py-1.5 text-xs font-bold text-muted hover:text-ink rounded-xs uppercase tracking-wider">
-          Setelan
-        </button>
       </nav>
 
-      <!-- User Profile Pic / Logout -->
-      <div class="flex items-center pl-2 border-l border-hairline">
-        <button type="button" id="btnUserMenu" class="flex items-center gap-2 p-1 hover:bg-canvas-soft rounded-xs transition" title="Profil Akun Google">
+      <!-- User Profile Pic & Dropdown Menu -->
+      <div class="relative flex items-center pl-2 border-l border-hairline">
+        <button
+          type="button"
+          id="btnUserMenu"
+          class="flex items-center gap-1.5 p-1 hover:bg-canvas-soft rounded-xs transition border border-transparent hover:border-hairline"
+          title="Menu Akun Google"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
           <img id="navUserAvatar" src="/icon.svg" class="w-8 h-8 rounded-full border border-hairline object-cover" alt="Avatar" />
+          <span class="text-[9px] text-muted">▼</span>
         </button>
+
+        <!-- Account Popover / Dropdown Menu -->
+        <div
+          id="userAccountDropdown"
+          class="hidden absolute right-0 top-full mt-2 w-72 bg-white border border-hairline-strong rounded-lg shadow-flat-hover p-4 z-50 space-y-3"
+        >
+          <!-- User Profile Header -->
+          <div class="flex items-start gap-3 border-b border-hairline pb-3">
+            <img id="dropdownUserAvatar" src="/icon.svg" class="w-10 h-10 rounded-full border border-hairline object-cover shrink-0" alt="Avatar" />
+            <div class="min-w-0 flex-1">
+              <div id="dropdownUserName" class="text-xs font-bold text-ink truncate">Pengguna</div>
+              <div id="dropdownUserEmail" class="text-[11px] text-muted truncate">user@gmail.com</div>
+              <span class="inline-block mt-1 text-[9px] font-bold uppercase text-primary bg-mint-50 border border-mint-200 px-1.5 py-0.5 rounded-xs">
+                ● Terkoneksi
+              </span>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="space-y-1">
+            <button
+              type="button"
+              id="btnDropdownExport"
+              class="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-ink hover:bg-mint-50 hover:text-primary rounded-xs transition text-left"
+            >
+              <span>📊</span>
+              <span>Ekspor Excel / Sheets (.xlsx)</span>
+            </button>
+            <button
+              type="button"
+              id="btnDropdownReset"
+              class="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-muted hover:bg-red-50 hover:text-error rounded-xs transition text-left"
+            >
+              <span>🗑️</span>
+              <span>Reset Data Akun Ini</span>
+            </button>
+          </div>
+
+          <div class="border-t border-hairline pt-2">
+            <button
+              type="button"
+              id="btnLogoutGoogle"
+              class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-wider text-error bg-red-50 hover:bg-red-100 border border-error/30 rounded-xs transition"
+            >
+              <span>🚪</span>
+              <span>Keluar Akun Google</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 

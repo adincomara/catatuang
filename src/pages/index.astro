@@ -6,13 +6,11 @@ import HomeTab from '../components/HomeTab.astro';
 import WalletsTab from '../components/WalletsTab.astro';
 import TransactionsTab from '../components/TransactionsTab.astro';
 import StatsTab from '../components/StatsTab.astro';
-import SettingsTab from '../components/SettingsTab.astro';
 import MobileBottomNav from '../components/MobileBottomNav.astro';
 import PeriodModal from '../components/PeriodModal.astro';
 import TransactionModal from '../components/TransactionModal.astro';
 import WalletModal from '../components/WalletModal.astro';
 import TransactionDetailModal from '../components/TransactionDetailModal.astro';
-import GoogleClientIdModal from '../components/GoogleClientIdModal.astro';
 ---
 
 <Layout title="CatatUang - Catatan Keuangan Pribadi">
@@ -28,12 +26,11 @@ import GoogleClientIdModal from '../components/GoogleClientIdModal.astro';
 
     <!-- Main Container (1200px Grid as per design.md) -->
     <main class="flex-1 w-full max-w-[1200px] mx-auto px-4 lg:px-8 py-5 pb-24 lg:pb-12">
-      <!-- 5 Tab Views -->
+      <!-- 4 Core Tab Views -->
       <HomeTab />
       <WalletsTab />
       <TransactionsTab />
       <StatsTab />
-      <SettingsTab />
     </main>
 
     <!-- Mobile Bottom Navigation (< 1024px) -->
@@ -44,7 +41,6 @@ import GoogleClientIdModal from '../components/GoogleClientIdModal.astro';
     <TransactionModal />
     <WalletModal />
     <TransactionDetailModal />
-    <GoogleClientIdModal />
 
     <!-- Global Toast Feedback -->
     <div
