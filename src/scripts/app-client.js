@@ -1090,15 +1090,29 @@ export function logoutGoogle() {
 
 // --- EXPORT & BACKUP UTILITIES ---
 
-export function exportXLSX() {
-  if (!window.XLSX) {
-    showToast('Modul Spreadsheet belum siap, coba refresh browser.');
-    return;
-  }
+async function ensureXLSX() {
+  if (typeof window !== 'undefined' && window.XLSX) return window.XLSX;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = '/xlsx.full.min.js';
+    s.onload = () => resolve(window.XLSX);
+    s.onerror = () => reject(new Error('Gagal memuat modul spreadsheet'));
+    document.head.appendChild(s);
+  });
+}
 
+export async function exportXLSX() {
   const periodTxs = state.getPeriodTransactions();
   if (periodTxs.length === 0) {
     showToast(`Tidak ada transaksi dalam periode ${formatPeriodLabel()} untuk diekspor!`);
+    return;
+  }
+
+  showToast('Menyiapkan file spreadsheet...');
+  try {
+    await ensureXLSX();
+  } catch {
+    showToast('Gagal memuat modul Excel. Coba lagi.');
     return;
   }
 

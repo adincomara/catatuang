@@ -55,18 +55,20 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-body mb-1">Dari Tanggal</label>
+            <label for="periodCustomStartDate" class="block text-xs font-medium text-body mb-1">Dari Tanggal</label>
             <input
               type="date"
               id="periodCustomStartDate"
+              aria-label="Pilih tanggal awal rentang"
               class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label class="block text-xs font-medium text-body mb-1">Sampai Tanggal</label>
+            <label for="periodCustomEndDate" class="block text-xs font-medium text-body mb-1">Sampai Tanggal</label>
             <input
               type="date"
               id="periodCustomEndDate"
+              aria-label="Pilih tanggal akhir rentang"
               class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
             />
           </div>

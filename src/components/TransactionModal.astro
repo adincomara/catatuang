@@ -57,7 +57,7 @@
 
       <!-- Nominal Input -->
       <div>
-        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Nominal (Rp)</label>
+        <label for="txModalAmount" class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Nominal (Rp)</label>
         <div class="relative">
           <span class="absolute left-3.5 top-2.5 text-lg font-bold text-muted">Rp</span>
           <input
@@ -65,6 +65,7 @@
             inputmode="numeric"
             autocomplete="off"
             id="txModalAmount"
+            aria-label="Nominal Transaksi dalam Rupiah"
             placeholder="0"
             class="w-full pl-12 pr-4 py-2.5 text-2xl font-black bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
           />
@@ -82,11 +83,12 @@
       <!-- Wallet Selection -->
       <div class="grid grid-cols-1 gap-3">
         <div>
-          <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1" id="labelSourceWallet">
+          <label for="txModalSourceWallet" class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1" id="labelSourceWallet">
             Dompet / Rekening
           </label>
           <select
             id="txModalSourceWallet"
+            aria-label="Pilih dompet atau rekening"
             class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink font-semibold focus:outline-none focus:border-primary"
           >
             <!-- Injected -->
@@ -94,11 +96,12 @@
         </div>
 
         <div id="boxTargetWallet" class="hidden">
-          <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
+          <label for="txModalTargetWallet" class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">
             Ke Dompet Tujuan
           </label>
           <select
             id="txModalTargetWallet"
+            aria-label="Pilih dompet atau rekening tujuan transfer"
             class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink font-semibold focus:outline-none focus:border-primary"
           >
             <!-- Injected -->
@@ -116,20 +119,22 @@
 
       <!-- Date & Time Local -->
       <div>
-        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Tanggal & Waktu</label>
+        <label for="txModalDateTime" class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Tanggal & Waktu</label>
         <input
           type="datetime-local"
           id="txModalDateTime"
+          aria-label="Tanggal dan waktu transaksi"
           class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
         />
       </div>
 
       <!-- Notes -->
       <div>
-        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Catatan (Opsional)</label>
+        <label for="txModalNote" class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-1">Catatan (Opsional)</label>
         <input
           type="text"
           id="txModalNote"
+          aria-label="Catatan transaksi opsional"
           placeholder="Contoh: Belanja bulanan di minimarket"
           class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
         />
