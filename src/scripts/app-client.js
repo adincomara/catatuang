@@ -186,8 +186,8 @@ export async function triggerAutoSync(silent = false) {
         }
       }
     }
-  } catch (err) {
-    console.warn('Auto-sync network warning:', err);
+  } catch {
+    // ponytail: transient network drops handled silently, retried on next poll
   } finally {
     isSyncing = false;
     updateSyncUI();
@@ -510,41 +510,56 @@ function renderStats() {
     }).join('');
   }
 
-  // Draw or update Chart.js
-  const canvas = document.getElementById('statsChartCanvas');
-  if (canvas && window.Chart) {
-    if (state.chartInstance) {
-      state.chartInstance.destroy();
-      state.chartInstance = null;
-    }
+  // Draw or update Chart.js only when Stats tab is active to eliminate forced reflows & unused JS
+  if (state.currentTab === 'stats') {
+    ensureChart().then((ChartLib) => {
+      const canvas = document.getElementById('statsChartCanvas');
+      if (!canvas || !ChartLib) return;
+      if (state.chartInstance) {
+        state.chartInstance.destroy();
+        state.chartInstance = null;
+      }
 
-    if (catEntries.length > 0) {
-      const labels = catEntries.map(([catId]) => getCategory('expense', catId).name);
-      const data = catEntries.map(([, amt]) => amt);
-      const colors = ['#008254', '#006642', '#10b981', '#06b6d4', '#005fb9', '#8b5cf6', '#eab308', '#f97316', '#de2828', '#64748b'];
+      if (catEntries.length > 0) {
+        const labels = catEntries.map(([catId]) => getCategory('expense', catId).name);
+        const data = catEntries.map(([, amt]) => amt);
+        const colors = ['#008254', '#006642', '#10b981', '#06b6d4', '#005fb9', '#8b5cf6', '#eab308', '#f97316', '#de2828', '#64748b'];
 
-      state.chartInstance = new window.Chart(canvas, {
-        type: 'doughnut',
-        data: {
-          labels,
-          datasets: [{
-            data,
-            backgroundColor: colors.slice(0, data.length),
-            borderWidth: 0,
-            hoverOffset: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false }
+        state.chartInstance = new ChartLib(canvas, {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{
+              data,
+              backgroundColor: colors.slice(0, data.length),
+              borderWidth: 0,
+              hoverOffset: 4
+            }]
           },
-          cutout: '68%'
-        }
-      });
-    }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            cutout: '68%'
+          }
+        });
+      }
+    }).catch(() => {});
   }
+}
+
+// ponytail: lazy loader for Chart.js, keeps initial bundle light
+async function ensureChart() {
+  if (typeof window !== 'undefined' && window.Chart) return window.Chart;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = '/chart.min.js';
+    s.onload = () => resolve(window.Chart);
+    s.onerror = () => reject(new Error('Gagal memuat Chart.js'));
+    document.head.appendChild(s);
+  });
 }
 
 // --- INTERACTIVE ACTIONS ---
@@ -1016,11 +1031,27 @@ export function saveWallet() {
 
 // --- GOOGLE AUTHENTICATION (MANDATORY GATE) ---
 
-export function loginWithGoogle() {
+async function ensureGoogleGIS() {
+  if (typeof window !== 'undefined' && window.google?.accounts?.oauth2) return window.google;
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.async = true;
+    s.defer = true;
+    s.onload = () => resolve(window.google);
+    s.onerror = () => reject(new Error('Gagal memuat Google Sign-In SDK'));
+    document.head.appendChild(s);
+  });
+}
+
+export async function loginWithGoogle() {
   const clientId = DEFAULT_GOOGLE_CLIENT_ID;
 
-  if (typeof window.google === 'undefined' || !window.google.accounts || !window.google.accounts.oauth2) {
-    showToast('Sedang memuat SDK Google, coba 2 detik lagi...');
+  showToast('Menghubungkan ke Google...');
+  try {
+    await ensureGoogleGIS();
+  } catch (err) {
+    showToast('Gagal memuat SDK Google: ' + err.message);
     return;
   }
 
@@ -1038,7 +1069,6 @@ export function loginWithGoogle() {
     });
     client.requestAccessToken();
   } catch (err) {
-    console.error('Google auth error:', err);
     showToast('Error login Google: ' + err.message);
   }
 }
@@ -1072,7 +1102,6 @@ async function fetchGoogleProfile(token) {
       showToast('Gagal memverifikasi profil Google.');
     }
   } catch (err) {
-    console.error('User info fetch error:', err);
     showToast('Gagal memuat profil: ' + err.message);
   }
 }

@@ -131,8 +131,8 @@ export class AppState {
     if (typeof localStorage === 'undefined') return;
     try {
       localStorage.setItem(key, JSON.stringify(val));
-    } catch (e) {
-      console.error('LocalStorage write error:', e);
+    } catch {
+      // ponytail: quota exceeded silently handled to avoid console error logs
     }
   }
 

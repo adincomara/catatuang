@@ -25,17 +25,10 @@ const { title = "CatatUang - Catatan Keuangan Pribadi" } = Astro.props;
 
   <!-- Fonts: Non-blocking async load with system font fallback -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" />
   </noscript>
-
-  <!-- Google Identity Services (async & non-blocking) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Chart.js deferred for fast initial LCP; SheetJS lazy-loaded on export -->
-  <script is:inline src="/chart.min.js" defer></script>
 
   <!-- Instant Theme Bootstrapper (No Flash of Light Theme) -->
   <script is:inline>
@@ -212,8 +205,8 @@ const { title = "CatatUang - Catatan Keuangan Pribadi" } = Astro.props;
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => {
-          console.warn('SW registration failed:', err);
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+          // ponytail: fail silently in restricted/private browsing
         });
       });
     }

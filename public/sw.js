@@ -1,10 +1,8 @@
-const CACHE_NAME = 'catatuang-astro-v1';
+const CACHE_NAME = 'catatuang-astro-v2';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/icon.svg',
-  '/chart.min.js',
-  '/xlsx.full.min.js'
+  '/icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
