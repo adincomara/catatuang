@@ -2,27 +2,27 @@
 // Responsive Top Navbar according to design.md
 ---
 
-<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-hairline px-4 lg:px-8 py-3">
-  <div class="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
+<header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-hairline px-3 sm:px-4 lg:px-8 py-2.5 sm:py-3">
+  <div class="max-w-[1200px] mx-auto flex items-center justify-between gap-2 sm:gap-4">
     
     <!-- Left: Brand Wordmark -->
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 bg-primary rounded-xs flex items-center justify-center text-white font-black text-sm">
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <div class="w-7 h-7 sm:w-8 sm:h-8 bg-primary rounded-xs flex items-center justify-center text-white font-black text-xs sm:text-sm">
         CU
       </div>
-      <div class="hidden sm:block">
+      <div class="hidden md:block">
         <span class="text-base font-extrabold text-ink tracking-tight">Catat<span class="text-primary">Uang</span></span>
-        <span class="hidden md:inline-block ml-2 text-[10px] uppercase font-bold text-muted bg-mint-50 px-2 py-0.5 rounded-xs border border-hairline">Personal</span>
+        <span class="ml-2 text-[10px] uppercase font-bold text-muted bg-mint-50 px-2 py-0.5 rounded-xs border border-hairline">Personal</span>
       </div>
     </div>
 
     <!-- Center: Custom Period Selector Pill & Sync Status -->
-    <div class="flex items-center gap-2">
-      <div class="flex items-center bg-canvas-soft border border-hairline rounded-xs p-1">
+    <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+      <div class="flex items-center bg-canvas-soft border border-hairline rounded-xs p-0.5 sm:p-1">
         <button
           type="button"
           id="btnPrevPeriod"
-          class="w-7 h-7 flex items-center justify-center text-muted hover:text-ink hover:bg-white rounded-xs transition text-sm font-bold"
+          class="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-muted hover:text-ink hover:bg-white rounded-xs transition text-xs sm:text-sm font-bold"
           title="Periode Sebelumnya"
         >
           ‹
@@ -31,17 +31,17 @@
         <button
           type="button"
           id="btnOpenPeriodModal"
-          class="flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold text-ink hover:text-primary transition"
+          class="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 text-[11px] sm:text-xs font-bold text-ink hover:text-primary transition truncate max-w-[130px] sm:max-w-none"
         >
-          <span class="text-sm">📅</span>
-          <span id="labelCurrentPeriod">Bulan Ini</span>
-          <span class="text-[10px] text-muted">▼</span>
+          <span class="text-xs sm:text-sm shrink-0">📅</span>
+          <span id="labelCurrentPeriod" class="truncate">Bulan Ini</span>
+          <span class="text-[8px] sm:text-[10px] text-muted shrink-0">▼</span>
         </button>
 
         <button
           type="button"
           id="btnNextPeriod"
-          class="w-7 h-7 flex items-center justify-center text-muted hover:text-ink hover:bg-white rounded-xs transition text-sm font-bold"
+          class="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-muted hover:text-ink hover:bg-white rounded-xs transition text-xs sm:text-sm font-bold"
           title="Periode Berikutnya"
         >
           ›
@@ -52,18 +52,18 @@
       <button
         type="button"
         id="syncStatusBadge"
-        class="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold rounded-xs bg-mint-50 border border-mint-200 text-primary transition"
+        class="flex items-center gap-1.5 px-1.5 sm:px-2 py-1 text-[10px] font-bold rounded-xs bg-mint-50 border border-mint-200 text-primary transition shrink-0"
         title="Klik untuk cek status sinkronisasi D1"
       >
-        <span id="syncStatusDot" class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-        <span id="syncStatusText" class="hidden xs:inline">100% Tersinkron</span>
+        <span id="syncStatusDot" class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+        <span id="syncStatusText" class="hidden sm:inline">100% Tersinkron</span>
       </button>
     </div>
 
     <!-- Right: Balance & User Status -->
-    <div class="flex items-center gap-3">
-      <!-- Total Balance Display -->
-      <div class="text-right">
+    <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+      <!-- Total Balance Display (Hidden on small mobile screens < 640px) -->
+      <div class="text-right hidden sm:block">
         <div class="text-[10px] uppercase font-bold text-muted tracking-wider">Saldo Periode</div>
         <div class="flex items-center justify-end gap-1.5">
           <span id="headerTotalBalance" class="text-sm lg:text-base font-black text-ink">Rp 0</span>
@@ -90,17 +90,17 @@
       </nav>
 
       <!-- User Profile Pic & Dropdown Menu -->
-      <div class="relative flex items-center pl-2 border-l border-hairline">
+      <div class="relative flex items-center pl-1 sm:pl-2 border-l border-hairline">
         <button
           type="button"
           id="btnUserMenu"
-          class="flex items-center gap-1.5 p-1 hover:bg-canvas-soft rounded-xs transition border border-transparent hover:border-hairline"
+          class="flex items-center gap-1 p-0.5 sm:p-1 hover:bg-canvas-soft rounded-xs transition border border-transparent hover:border-hairline"
           title="Menu Akun Google"
           aria-haspopup="true"
           aria-expanded="false"
         >
-          <img id="navUserAvatar" src="/icon.svg" class="w-8 h-8 rounded-full border border-hairline object-cover" alt="Avatar" />
-          <span class="text-[9px] text-muted">▼</span>
+          <img id="navUserAvatar" src="/icon.svg" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-hairline object-cover" alt="Avatar" />
+          <span class="text-[8px] sm:text-[9px] text-muted">▼</span>
         </button>
 
         <!-- Account Popover / Dropdown Menu -->
