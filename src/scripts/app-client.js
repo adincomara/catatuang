@@ -37,6 +37,19 @@ export function formatCurrency(amount) {
   }).format(num);
 }
 
+export function formatThousands(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const cleaned = String(val).replace(/[^0-9]/g, '');
+  if (!cleaned) return '';
+  return new Intl.NumberFormat('id-ID').format(Number(cleaned));
+}
+
+export function parseRawAmount(val) {
+  if (val === null || val === undefined || val === '') return 0;
+  const cleaned = String(val).replace(/[^0-9]/g, '');
+  return Number(cleaned) || 0;
+}
+
 export function formatDisplayDate(dateStr) {
   const d = new Date(dateStr);
   const now = new Date();
@@ -667,7 +680,7 @@ export function openEditTransactionModal(txId) {
   if (titleEl) titleEl.textContent = 'Ubah Transaksi';
 
   const amtInput = document.getElementById('txModalAmount');
-  if (amtInput) amtInput.value = tx.amount;
+  if (amtInput) amtInput.value = formatThousands(tx.amount);
 
   const noteInput = document.getElementById('txModalNote');
   if (noteInput) noteInput.value = tx.note || '';
@@ -764,7 +777,7 @@ export function selectCategory(catId) {
 
 export function saveTransaction() {
   const amtInput = document.getElementById('txModalAmount');
-  const amount = Number(amtInput ? amtInput.value : 0);
+  const amount = parseRawAmount(amtInput ? amtInput.value : 0);
   if (!amount || amount <= 0) {
     showToast('Nominal transaksi harus lebih dari 0!');
     return;
@@ -921,7 +934,7 @@ export function openEditWalletModal(walletId) {
   if (title) title.textContent = 'Ubah Dompet';
   if (nameInp) nameInp.value = w.name;
   if (typeInp) typeInp.value = w.type;
-  if (balInp) balInp.value = w.initialBalance || 0;
+  if (balInp) balInp.value = formatThousands(w.initialBalance || 0);
 
   if (delBtn) {
     if (state.wallets.length > 1) {
@@ -953,7 +966,7 @@ export function closeWalletModal() {
 export function saveWallet() {
   const name = document.getElementById('walletNameInput')?.value?.trim();
   const type = document.getElementById('walletTypeInput')?.value || 'bank';
-  const balance = Number(document.getElementById('walletBalanceInput')?.value || 0);
+  const balance = parseRawAmount(document.getElementById('walletBalanceInput')?.value);
 
   if (!name) {
     showToast('Nama dompet tidak boleh kosong!');
@@ -1150,7 +1163,7 @@ export function handleReceiptFile(file) {
     const randomAmt = [25000, 38500, 52000, 75000, 115000][Math.floor(Math.random() * 5)];
     const amtInput = document.getElementById('txModalAmount');
     const noteInput = document.getElementById('txModalNote');
-    if (amtInput) amtInput.value = randomAmt;
+    if (amtInput) amtInput.value = formatThousands(randomAmt);
     if (noteInput) noteInput.value = 'Struk Pembelian ' + file.name.slice(0, 15);
     setTxTypeSwitch('expense');
     selectCategory('groceries');
@@ -1285,9 +1298,23 @@ function setupListeners() {
     b.addEventListener('click', () => {
       const amtInput = document.getElementById('txModalAmount');
       if (amtInput) {
-        amtInput.value = (Number(amtInput.value) || 0) + Number(b.dataset.amt);
+        const cur = parseRawAmount(amtInput.value);
+        amtInput.value = formatThousands(cur + Number(b.dataset.amt));
       }
     });
+  });
+
+  // Live Thousand Separator formatting for numeric inputs
+  const txAmtInput = document.getElementById('txModalAmount');
+  txAmtInput?.addEventListener('input', (e) => {
+    const raw = parseRawAmount(e.target.value);
+    e.target.value = raw > 0 ? formatThousands(raw) : '';
+  });
+
+  const walletBalInput = document.getElementById('walletBalanceInput');
+  walletBalInput?.addEventListener('input', (e) => {
+    const raw = parseRawAmount(e.target.value);
+    e.target.value = raw > 0 ? formatThousands(raw) : '';
   });
   document.getElementById('btnSaveTransaction')?.addEventListener('click', saveTransaction);
   document.querySelectorAll('.btn-close-detail-modal').forEach(b => b.addEventListener('click', closeDetailModal));

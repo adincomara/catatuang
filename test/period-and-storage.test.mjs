@@ -136,4 +136,26 @@ assert.equal(merged.find(x => x.id === 't1').amount, 55000, 't1 updated to lates
 assert.equal(merged.find(x => x.id === 't2'), undefined, 't2 must be removed');
 assert.equal(merged.find(x => x.id === 't3').amount, 15000, 't3 added from server');
 
-console.log('✓ All 6 core logic test assertions passed successfully.');
+// Test 7: Thousand separator formatting & safe parsing
+function formatThousands(val) {
+  if (val === null || val === undefined || val === '') return '';
+  const cleaned = String(val).replace(/[^0-9]/g, '');
+  if (!cleaned) return '';
+  return new Intl.NumberFormat('id-ID').format(Number(cleaned));
+}
+
+function parseRawAmount(val) {
+  if (val === null || val === undefined || val === '') return 0;
+  const cleaned = String(val).replace(/[^0-9]/g, '');
+  return Number(cleaned) || 0;
+}
+
+assert.equal(formatThousands(50000), '50.000');
+assert.equal(formatThousands(500000), '500.000');
+assert.equal(formatThousands(5000000), '5.000.000');
+assert.equal(parseRawAmount('50.000'), 50000, 'Must safely parse 50.000 as 50000, not 50');
+assert.equal(parseRawAmount('5.000.000'), 5000000, 'Must safely parse 5.000.000 as 5000000');
+assert.equal(parseRawAmount(''), 0);
+assert.equal(parseRawAmount(null), 0);
+
+console.log('✓ All 7 core logic test assertions passed successfully.');
