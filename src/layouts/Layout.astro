@@ -33,6 +33,17 @@ const { title = "CatatUang - Catatan Keuangan Pribadi" } = Astro.props;
   <script is:inline src="/chart.min.js"></script>
   <script is:inline src="/xlsx.full.min.js"></script>
 
+  <!-- Instant Theme Bootstrapper (No Flash of Light Theme) -->
+  <script is:inline>
+    (function() {
+      const stored = localStorage.getItem('catatuang_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+
   <style is:global>
     :root {
       --color-primary: #008254;
@@ -56,6 +67,62 @@ const { title = "CatatUang - Catatan Keuangan Pribadi" } = Astro.props;
       background-color: #f7f7f7;
       color: #3d4045;
       -webkit-font-smoothing: antialiased;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    /* Dark Mode Global Overrides */
+    html.dark {
+      color-scheme: dark;
+    }
+    html.dark body {
+      background-color: #0f1013;
+      color: #d1d5db;
+    }
+    html.dark #mainAppView,
+    html.dark #loginGateView {
+      background-color: #0f1013 !important;
+    }
+    html.dark .bg-white {
+      background-color: #181a1f !important;
+    }
+    html.dark .bg-canvas-soft {
+      background-color: #121316 !important;
+    }
+    html.dark .border-hairline {
+      border-color: #272a31 !important;
+    }
+    html.dark .border-hairline-strong {
+      border-color: #343842 !important;
+    }
+    html.dark .text-ink {
+      color: #f3f4f6 !important;
+    }
+    html.dark .text-body {
+      color: #d1d5db !important;
+    }
+    html.dark .text-muted {
+      color: #9ca3af !important;
+    }
+    html.dark .bg-mint-50 {
+      background-color: rgba(16, 185, 129, 0.12) !important;
+    }
+    html.dark .border-mint-200 {
+      border-color: rgba(16, 185, 129, 0.28) !important;
+    }
+    html.dark .text-primary {
+      color: #10b981 !important;
+    }
+    html.dark header,
+    html.dark nav {
+      background-color: rgba(24, 26, 31, 0.95) !important;
+      border-color: #272a31 !important;
+    }
+    html.dark input,
+    html.dark select,
+    html.dark textarea {
+      background-color: #121316 !important;
+      color: #f3f4f6 !important;
+      border-color: #343842 !important;
     }
 
     /* Utilitarian NerdWallet button shape: flat padding, nearly square corners (2px) */

@@ -1176,16 +1176,45 @@ export function handleReceiptFile(file) {
   }, 900);
 }
 
+// --- THEME ENGINE (LIGHT / DARK) ---
+
+export function initTheme() {
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  updateThemeUI(isDark);
+}
+
+export function toggleTheme() {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('catatuang_theme', isDark ? 'dark' : 'light');
+  updateThemeUI(isDark);
+  if (state?.currentTab === 'stats') {
+    renderStats();
+  }
+}
+
+export function updateThemeUI(isDark) {
+  const navIcon = document.getElementById('themeToggleIcon');
+  if (navIcon) navIcon.textContent = isDark ? '☀️' : '🌙';
+
+  const dropIcon = document.getElementById('dropdownThemeIcon');
+  if (dropIcon) dropIcon.textContent = isDark ? '☀️' : '🌙';
+
+  const dropLabel = document.getElementById('dropdownThemeLabel');
+  if (dropLabel) dropLabel.textContent = isDark ? 'Gelap' : 'Terang';
+}
+
 // --- INIT APP ENTRY POINT ---
 
 export function initCatatUang() {
   state = new AppState();
+  initTheme();
 
   // Attach global reference for inline event triggers
   window.catatuangApp = {
     state,
     renderApp,
     switchTab,
+    toggleTheme,
     openPeriodModal,
     closePeriodModal,
     applyPresetPeriod,
@@ -1255,6 +1284,12 @@ function setupListeners() {
   });
   document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // Theme Toggles
+  document.getElementById('btnToggleTheme')?.addEventListener('click', toggleTheme);
+  document.getElementById('btnDropdownTheme')?.addEventListener('click', () => {
+    toggleTheme();
   });
 
   // Account Dropdown Menu in Navbar

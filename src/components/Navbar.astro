@@ -89,6 +89,17 @@
         </button>
       </nav>
 
+      <!-- Theme Toggle Button (Light/Dark) -->
+      <button
+        type="button"
+        id="btnToggleTheme"
+        class="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-xs text-muted hover:text-ink hover:bg-canvas-soft transition border border-transparent hover:border-hairline text-sm"
+        title="Ganti Mode Gelap / Terang"
+        aria-label="Ganti Mode Tema"
+      >
+        <span id="themeToggleIcon">🌙</span>
+      </button>
+
       <!-- User Profile Pic & Dropdown Menu -->
       <div class="relative flex items-center pl-1 sm:pl-2 border-l border-hairline">
         <button
@@ -122,6 +133,19 @@
 
           <!-- Quick Actions -->
           <div class="space-y-1">
+            <button
+              type="button"
+              id="btnDropdownTheme"
+              class="w-full flex items-center justify-between px-2.5 py-2 text-xs font-semibold text-ink hover:bg-mint-50 hover:text-primary rounded-xs transition text-left"
+            >
+              <span class="flex items-center gap-2.5">
+                <span id="dropdownThemeIcon">🌙</span>
+                <span>Mode Tampilan</span>
+              </span>
+              <span id="dropdownThemeLabel" class="text-[10px] uppercase font-bold text-muted bg-canvas-soft px-1.5 py-0.5 rounded-xs">
+                Terang
+              </span>
+            </button>
             <button
               type="button"
               id="btnDropdownExport"
