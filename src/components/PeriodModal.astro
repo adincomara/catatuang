@@ -1,95 +1,210 @@
 ---
-// Custom Date Period Selection Modal
+// Unified Period & Closing Management Modal
 ---
 
-<div id="periodModal" class="modal-backdrop fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4">
-  <div class="modal-panel bg-white w-full sm:max-w-md rounded-t-lg sm:rounded-lg border border-hairline-strong shadow-flat-overlay overflow-hidden">
+<div id="periodModal" class="modal-backdrop fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="modal-panel bg-white w-full sm:max-w-lg rounded-t-lg sm:rounded-lg border border-hairline-strong shadow-flat-overlay flex flex-col max-h-[90vh] overflow-hidden">
     
-    <!-- Header -->
+    <!-- Header with Subtitle and Close Button -->
     <div class="p-4 border-b border-hairline flex items-center justify-between bg-canvas-soft">
       <div>
-        <h3 class="text-sm font-bold text-ink uppercase tracking-wider">Atur Periode Tanggal</h3>
-        <p class="text-xs text-muted">Sesuaikan rentang waktu transaksi dan saldo.</p>
+        <h3 class="text-sm font-extrabold text-ink uppercase tracking-wider">
+          Periode & Siklus Buku
+        </h3>
+        <p class="text-xs text-muted" id="periodModalSubtitle">
+          Atur rentang tanggal berjalan atau lakukan closing buku.
+        </p>
       </div>
-      <button type="button" class="btn-close-period-modal text-muted hover:text-ink text-base p-1">
+      <button type="button" class="btn-close-period-modal text-muted hover:text-ink text-base p-1" aria-label="Tutup modal">
         ✕
       </button>
     </div>
 
-    <!-- Body -->
-    <div class="p-5 space-y-5">
-      <!-- Preset Buttons Grid -->
-      <div>
-        <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
-          Pilihan Cepat (Preset)
-        </label>
-        <div class="grid grid-cols-2 gap-2">
-          <button type="button" data-preset="thisMonth" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
-            🗓️ Bulan Ini
-          </button>
-          <button type="button" data-preset="lastMonth" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
-            ⏮️ Bulan Lalu
-          </button>
-          <button type="button" data-preset="last7Days" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
-            ⚡ 7 Hari Terakhir
-          </button>
-          <button type="button" data-preset="last30Days" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
-            📊 30 Hari Terakhir
-          </button>
-          <button type="button" data-preset="thisYear" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left col-span-2">
-            📅 Tahun Ini (Januari - Desember)
-          </button>
-        </div>
-      </div>
+    <!-- Segmented Tabs: [Atur Periode] vs [Closing & Arsip] -->
+    <div class="flex border-b border-hairline bg-canvas-soft px-4 pt-2 gap-2">
+      <button
+        type="button"
+        id="tabBtnPeriodDate"
+        class="period-modal-tab-btn active px-3 py-2 text-xs font-bold border-b-2 border-primary text-primary transition"
+      >
+        🗓️ Rentang Tanggal
+      </button>
+      <button
+        type="button"
+        id="tabBtnPeriodClosing"
+        class="period-modal-tab-btn px-3 py-2 text-xs font-bold border-b-2 border-transparent text-muted hover:text-ink transition flex items-center gap-1.5"
+      >
+        🔒 Closing & Arsip
+        <span id="periodBatchCountBadge" class="hidden text-[9px] font-black bg-mint-100 text-primary px-1.5 py-0.2 rounded-xs">0</span>
+      </button>
+    </div>
 
-      <!-- Custom Date Range -->
-      <div class="border-t border-hairline pt-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <label class="block text-[11px] font-bold text-muted uppercase tracking-wider">
-            Rentang Kustom (Custom Range)
+    <!-- Scrollable Modal Body -->
+    <div class="p-4 sm:p-5 overflow-y-auto space-y-5">
+      
+      <!-- TAB 1: Atur Periode Berjalan -->
+      <div id="periodTabContentDate" class="space-y-5">
+        <!-- Preset Buttons Grid -->
+        <div>
+          <label class="block text-[11px] font-bold text-muted uppercase tracking-wider mb-2">
+            Pilihan Cepat (Preset)
           </label>
-          <span class="text-[10px] text-primary font-bold bg-mint-50 px-2 py-0.5 rounded-xs">
-            Bebas Pilih Tanggal
-          </span>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" data-preset="thisMonth" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
+              🗓️ Bulan Ini
+            </button>
+            <button type="button" data-preset="lastMonth" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
+              ⏮️ Bulan Lalu
+            </button>
+            <button type="button" data-preset="last7Days" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
+              ⚡ 7 Hari Terakhir
+            </button>
+            <button type="button" data-preset="last30Days" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left">
+              📊 30 Hari Terakhir
+            </button>
+            <button type="button" data-preset="thisYear" class="btn-period-preset py-2 px-3 text-xs font-semibold rounded-xs border border-hairline text-body hover:border-primary hover:text-primary active:bg-mint-50 transition text-left col-span-2">
+              📅 Tahun Ini (Januari - Desember)
+            </button>
+          </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label for="periodCustomStartDate" class="block text-xs font-medium text-body mb-1">Dari Tanggal</label>
-            <input
-              type="date"
-              id="periodCustomStartDate"
-              aria-label="Pilih tanggal awal rentang"
-              class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
-            />
+        <!-- Custom Date Range -->
+        <div class="border-t border-hairline pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="block text-[11px] font-bold text-muted uppercase tracking-wider">
+              Rentang Kustom (Misal: Tanggal Gajian)
+            </label>
+            <span class="text-[10px] text-primary font-bold bg-mint-50 px-2 py-0.5 rounded-xs">
+              Bebas Tentukan
+            </span>
           </div>
-          <div>
-            <label for="periodCustomEndDate" class="block text-xs font-medium text-body mb-1">Sampai Tanggal</label>
-            <input
-              type="date"
-              id="periodCustomEndDate"
-              aria-label="Pilih tanggal akhir rentang"
-              class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
-            />
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="periodCustomStartDate" class="block text-xs font-medium text-body mb-1">Dari Tanggal</label>
+              <input
+                type="date"
+                id="periodCustomStartDate"
+                aria-label="Pilih tanggal awal rentang"
+                class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label for="periodCustomEndDate" class="block text-xs font-medium text-body mb-1">Sampai Tanggal</label>
+              <input
+                type="date"
+                id="periodCustomEndDate"
+                aria-label="Pilih tanggal akhir rentang"
+                class="w-full p-2.5 text-xs bg-canvas-soft border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+              />
+            </div>
           </div>
         </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-hairline">
+          <button
+            type="button"
+            id="btnGoToClosingTab"
+            class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+          >
+            Selesai periode ini? Closing Buku →
+          </button>
+          <button
+            type="button"
+            id="btnApplyCustomPeriod"
+            class="btn-spruce px-4 py-2 text-xs uppercase"
+          >
+            Terapkan Periode
+          </button>
+        </div>
       </div>
+
+      <!-- TAB 2: Closing & Arsip -->
+      <div id="periodTabContentClosing" class="hidden space-y-5">
+        
+        <!-- Section: Closing Form -->
+        <div class="bg-canvas-soft border border-hairline p-4 rounded-xs space-y-3">
+          <div class="flex items-center justify-between">
+            <label for="batchNameInput" class="text-xs font-bold uppercase tracking-wider text-ink">
+              🔒 Closing Periode Aktif
+            </label>
+            <span id="batchCurrentPeriodBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-xs bg-mint-50 text-primary border border-mint-200">
+              Periode Aktif
+            </span>
+          </div>
+
+          <div>
+            <label for="batchNameInput" class="block text-[11px] font-medium text-body mb-1">
+              Nama Batch / Catatan Closing
+            </label>
+            <input
+              type="text"
+              id="batchNameInput"
+              placeholder="Contoh: Oktober 2026, Ramadhan 1447H, Proyek A"
+              class="w-full p-2.5 text-xs bg-white border border-hairline-strong rounded-xs text-ink focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          <div class="space-y-1.5 pt-1">
+            <label class="block text-[11px] font-medium text-body">
+              Saldo Dompet Setelah Closing:
+            </label>
+            <div class="space-y-1">
+              <label class="flex items-center gap-2 text-xs text-ink cursor-pointer">
+                <input type="radio" name="batchCarryBalance" value="reset" checked class="text-primary focus:ring-0" />
+                <span>Reset semua saldo dompet ke <strong>Rp 0</strong> (Mulai dari nol)</span>
+              </label>
+              <label class="flex items-center gap-2 text-xs text-ink cursor-pointer">
+                <input type="radio" name="batchCarryBalance" value="carry" class="text-primary focus:ring-0" />
+                <span>Bawa sisa saldo akhir periode ini sebagai saldo awal buku baru</span>
+              </label>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-muted leading-relaxed">
+            ℹ️ Transaksi periode ini akan diarsipkan permanen ke Cloudflare D1. Buku aktif dibersihkan untuk periode berikutnya.
+          </p>
+
+          <button
+            type="button"
+            id="btnArchiveBatchConfirm"
+            class="w-full py-2.5 px-3 bg-primary hover:bg-primary-deep text-white text-xs font-bold rounded-xs uppercase tracking-wider transition shadow-sm"
+          >
+            Closing Buku & Simpan ke D1
+          </button>
+        </div>
+
+        <!-- Section: Arsip Tersimpan -->
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-muted">
+              Daftar Arsip Buku yang Sudah Closing
+            </h4>
+            <button
+              type="button"
+              id="btnResetToLiveBook"
+              class="text-[11px] font-bold text-primary hover:underline hidden"
+            >
+              ← Kembali ke Buku Berjalan
+            </button>
+          </div>
+
+          <div id="batchArchiveList" class="space-y-2">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+      </div>
+
     </div>
 
     <!-- Footer Actions -->
-    <div class="p-4 bg-canvas-soft border-t border-hairline flex items-center justify-end gap-2">
+    <div class="p-3 bg-canvas-soft border-t border-hairline flex items-center justify-end">
       <button
         type="button"
         class="btn-close-period-modal btn-soft px-4 py-2 text-xs uppercase"
       >
-        Batal
-      </button>
-      <button
-        type="button"
-        id="btnApplyCustomPeriod"
-        class="btn-spruce px-5 py-2.5 text-xs uppercase"
-      >
-        Terapkan Periode
+        Tutup
       </button>
     </div>
 

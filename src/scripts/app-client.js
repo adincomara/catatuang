@@ -226,11 +226,6 @@ function renderHeader() {
     balanceEl.textContent = formatCurrency(state.getTotalBalance());
   }
 
-  const periodLabel = document.getElementById('labelCurrentPeriod');
-  if (periodLabel) {
-    periodLabel.textContent = formatPeriodLabel();
-  }
-
   const avatar = document.getElementById('navUserAvatar');
   if (avatar && state.googleUser && state.googleUser.picture) {
     avatar.src = state.googleUser.picture;
@@ -251,30 +246,23 @@ function renderHeader() {
     dropdownEmail.textContent = state.googleUser.email || '';
   }
 
-  // Update Batch Selector Pill & Read-only Archive Banner
-  const batchBtn = document.getElementById('btnBatchSelector');
-  const batchLabel = document.getElementById('batchSelectorLabel');
-  const batchIcon = document.getElementById('batchSelectorIcon');
+  // Update Period Label & Read-only Archive Banner
+  const periodLabel = document.getElementById('labelCurrentPeriod');
+  const activeBatch = state.getActiveBatch();
+  if (periodLabel) {
+    if (activeBatch) {
+      periodLabel.textContent = `📁 ${activeBatch.name}`;
+    } else {
+      periodLabel.textContent = formatPeriodLabel();
+    }
+  }
+
   const archiveBanner = document.getElementById('batchArchiveBanner');
   const archiveName = document.getElementById('batchArchiveName');
-
-  const activeBatch = state.getActiveBatch();
   if (activeBatch) {
-    if (batchLabel) batchLabel.textContent = activeBatch.name;
-    if (batchIcon) batchIcon.textContent = '📁';
-    if (batchBtn) {
-      batchBtn.classList.remove('bg-canvas-soft');
-      batchBtn.classList.add('bg-amber-400', 'border-amber-500');
-    }
     if (archiveBanner) archiveBanner.classList.remove('hidden');
     if (archiveName) archiveName.textContent = activeBatch.name;
   } else {
-    if (batchLabel) batchLabel.textContent = 'Buku Aktif';
-    if (batchIcon) batchIcon.textContent = '📦';
-    if (batchBtn) {
-      batchBtn.classList.add('bg-canvas-soft');
-      batchBtn.classList.remove('bg-amber-400', 'border-amber-500');
-    }
     if (archiveBanner) archiveBanner.classList.add('hidden');
   }
 
@@ -625,13 +613,67 @@ export function switchTab(tabName) {
   }
 }
 
-export function openPeriodModal() {
+export function switchPeriodModalTab(tabKey = 'date') {
+  const dateTabBtn = document.getElementById('tabBtnPeriodDate');
+  const closingTabBtn = document.getElementById('tabBtnPeriodClosing');
+  const dateContent = document.getElementById('periodTabContentDate');
+  const closingContent = document.getElementById('periodTabContentClosing');
+
+  const isDate = tabKey === 'date';
+  if (dateTabBtn) {
+    dateTabBtn.classList.toggle('border-primary', isDate);
+    dateTabBtn.classList.toggle('text-primary', isDate);
+    dateTabBtn.classList.toggle('border-transparent', !isDate);
+    dateTabBtn.classList.toggle('text-muted', !isDate);
+  }
+  if (closingTabBtn) {
+    closingTabBtn.classList.toggle('border-primary', !isDate);
+    closingTabBtn.classList.toggle('text-primary', !isDate);
+    closingTabBtn.classList.toggle('border-transparent', isDate);
+    closingTabBtn.classList.toggle('text-muted', isDate);
+  }
+  if (dateContent) dateContent.classList.toggle('hidden', !isDate);
+  if (closingContent) closingContent.classList.toggle('hidden', isDate);
+}
+
+export function openPeriodModal(presetTab = 'date') {
   const modal = document.getElementById('periodModal');
   const startInp = document.getElementById('periodCustomStartDate');
   const endInp = document.getElementById('periodCustomEndDate');
+  const badge = document.getElementById('batchCurrentPeriodBadge');
+  const nameInp = document.getElementById('batchNameInput');
+  const resetBtn = document.getElementById('btnResetToLiveBook');
+  const countBadge = document.getElementById('periodBatchCountBadge');
 
   if (startInp) startInp.value = state.startDate;
   if (endInp) endInp.value = state.endDate;
+
+  if (badge) badge.textContent = formatPeriodLabel();
+  if (nameInp) {
+    nameInp.value = '';
+    nameInp.placeholder = `Contoh: Periode ${formatPeriodLabel()}`;
+  }
+
+  const batchCount = (state.batches || []).length;
+  if (countBadge) {
+    countBadge.textContent = String(batchCount);
+    countBadge.classList.toggle('hidden', batchCount === 0);
+  }
+
+  if (resetBtn) {
+    if (state.activeBatchId) {
+      resetBtn.classList.remove('hidden');
+      resetBtn.onclick = () => {
+        exitBatchModeAction();
+        closePeriodModal();
+      };
+    } else {
+      resetBtn.classList.add('hidden');
+    }
+  }
+
+  renderBatchArchiveList();
+  switchPeriodModalTab(presetTab);
 
   if (modal) modal.classList.add('active');
 }
@@ -685,40 +727,7 @@ export function changePeriodDelta(delta) {
   showToast(`Periode: ${formatPeriodLabel()}`);
 }
 
-// --- BATCH (TUTUP BUKU) MODAL HANDLERS ---
-
-export function openBatchModal() {
-  const modal = document.getElementById('batchModal');
-  const badge = document.getElementById('batchCurrentPeriodBadge');
-  const nameInp = document.getElementById('batchNameInput');
-  const resetBtn = document.getElementById('btnResetToLiveBook');
-
-  if (badge) badge.textContent = formatPeriodLabel();
-  if (nameInp) {
-    nameInp.value = '';
-    nameInp.placeholder = `Contoh: Periode ${formatPeriodLabel()}`;
-  }
-
-  if (resetBtn) {
-    if (state.activeBatchId) {
-      resetBtn.classList.remove('hidden');
-      resetBtn.onclick = () => {
-        exitBatchModeAction();
-        closeBatchModal();
-      };
-    } else {
-      resetBtn.classList.add('hidden');
-    }
-  }
-
-  renderBatchArchiveList();
-  if (modal) modal.classList.add('active');
-}
-
-export function closeBatchModal() {
-  const modal = document.getElementById('batchModal');
-  if (modal) modal.classList.remove('active');
-}
+// --- BATCH (TUTUP BUKU & CLOSING) HANDLERS ---
 
 export function renderBatchArchiveList() {
   const container = document.getElementById('batchArchiveList');
@@ -728,7 +737,7 @@ export function renderBatchArchiveList() {
   if (batches.length === 0) {
     container.innerHTML = `
       <div class="p-4 bg-canvas-soft border border-hairline rounded-xs text-center text-xs text-muted">
-        Belum ada arsip batch tersimpan. Tutup buku di atas untuk membuat arsip pertama.
+        Belum ada arsip closing tersimpan. Lakukan closing buku di atas saat periode selesai.
       </div>
     `;
     return;
@@ -794,21 +803,21 @@ export function renderBatchArchiveList() {
 export function selectBatchAction(batchId) {
   state.selectBatch(batchId);
   const activeBatch = state.getActiveBatch();
-  closeBatchModal();
+  closePeriodModal();
   renderApp();
   showToast(`Melihat arsip batch: ${activeBatch?.name || ''} (Hanya Baca)`);
 }
 
 export function exitBatchModeAction() {
   state.exitBatchMode();
-  closeBatchModal();
+  closePeriodModal();
   renderApp();
-  showToast('Kembali ke Buku Aktif.');
+  showToast('Kembali ke Buku Berjalan.');
 }
 
 export async function archiveCurrentBatchAction() {
   if (state.activeBatchId) {
-    showToast('Harap kembali ke Buku Aktif terlebih dahulu untuk menutup buku.');
+    showToast('Harap kembali ke Buku Berjalan terlebih dahulu untuk closing.');
     return;
   }
 
@@ -819,19 +828,19 @@ export async function archiveCurrentBatchAction() {
 
   const periodTxs = state.getPeriodTransactions();
   if (periodTxs.length === 0) {
-    if (!confirm('Tidak ada transaksi pada periode aktif saat ini. Tetap ingin tutup buku?')) {
+    if (!confirm('Tidak ada transaksi pada periode aktif saat ini. Tetap ingin closing buku?')) {
       return;
     }
   } else {
-    if (!confirm(`Tutup buku untuk periode ${formatPeriodLabel()}?\n\n${periodTxs.length} transaksi akan dipindahkan ke Arsip D1 dan buku aktif direset.`)) {
+    if (!confirm(`Closing buku untuk periode ${formatPeriodLabel()}?\n\n${periodTxs.length} transaksi akan dipindahkan ke Arsip D1 dan buku aktif direset.`)) {
       return;
     }
   }
 
   const created = state.archiveCurrentBatch(batchName, carryOver);
-  closeBatchModal();
+  closePeriodModal();
   renderApp();
-  showToast(`✓ Batch "${created.name}" berhasil diarsipkan & disimpan!`);
+  showToast(`✓ Closing "${created.name}" berhasil disimpan ke D1!`);
   await triggerAutoSync(true);
 }
 
@@ -842,6 +851,12 @@ export function deleteBatchAction(batchId) {
   if (confirm(`Hapus permanen arsip batch "${b.name}"?`)) {
     state.deleteBatch(batchId);
     renderBatchArchiveList();
+    const countBadge = document.getElementById('periodBatchCountBadge');
+    if (countBadge) {
+      const c = (state.batches || []).length;
+      countBadge.textContent = String(c);
+      countBadge.classList.toggle('hidden', c === 0);
+    }
     renderApp();
     triggerAutoSync(true);
     showToast(`Arsip batch "${b.name}" telah dihapus.`);
@@ -1502,6 +1517,7 @@ export function initCatatUang() {
     toggleTheme,
     openPeriodModal,
     closePeriodModal,
+    switchPeriodModalTab,
     applyPresetPeriod,
     applyCustomDateRange,
     changePeriodDelta,
@@ -1517,8 +1533,6 @@ export function initCatatUang() {
     openEditWalletModal,
     closeWalletModal,
     saveWallet,
-    openBatchModal,
-    closeBatchModal,
     selectBatchAction,
     exitBatchModeAction,
     archiveCurrentBatchAction,
@@ -1546,14 +1560,15 @@ function setupListeners() {
   document.getElementById('btnGoogleLogin')?.addEventListener('click', loginWithGoogle);
 
   // Navbar & Period
-  document.getElementById('btnOpenPeriodModal')?.addEventListener('click', openPeriodModal);
+  document.getElementById('btnOpenPeriodModal')?.addEventListener('click', () => openPeriodModal('date'));
   document.getElementById('btnPrevPeriod')?.addEventListener('click', () => changePeriodDelta(-1));
   document.getElementById('btnNextPeriod')?.addEventListener('click', () => changePeriodDelta(1));
   document.querySelectorAll('.btn-close-period-modal').forEach(b => b.addEventListener('click', closePeriodModal));
 
-  // Batch & Tutup Buku
-  document.getElementById('btnBatchSelector')?.addEventListener('click', openBatchModal);
-  document.querySelectorAll('.btn-close-batch-modal').forEach(b => b.addEventListener('click', closeBatchModal));
+  // Period Modal Tabs & Closing Actions
+  document.getElementById('tabBtnPeriodDate')?.addEventListener('click', () => switchPeriodModalTab('date'));
+  document.getElementById('tabBtnPeriodClosing')?.addEventListener('click', () => switchPeriodModalTab('closing'));
+  document.getElementById('btnGoToClosingTab')?.addEventListener('click', () => switchPeriodModalTab('closing'));
   document.getElementById('btnArchiveBatchConfirm')?.addEventListener('click', archiveCurrentBatchAction);
   document.getElementById('btnExitBatchBanner')?.addEventListener('click', exitBatchModeAction);
   document.getElementById('btnResetToLiveBook')?.addEventListener('click', exitBatchModeAction);
